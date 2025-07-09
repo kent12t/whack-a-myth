@@ -440,24 +440,24 @@ function drawFeedback() {
     // Correct feedback
     textSize(width * 0.0208);
     textStyle(BOLD);
-    text("You got it!", feedbackX, feedbackY - 15);
+    text("You got it!", feedbackX, feedbackY - width * 0.009375);
     
     textSize(width * 0.025);
-    text(`+${SCORE_VALUES.CORRECT} points`, feedbackX, feedbackY + 15);
+    text(`+${SCORE_VALUES.CORRECT} points`, feedbackX, feedbackY + width * 0.009375);
   } else {
     // Wrong feedback
     textSize(width * 0.0208);
     textStyle(BOLD);
-    text("Oops!", feedbackX, feedbackY - 15);
+    text("Oops!", feedbackX, feedbackY - width * 0.009375);
     
     textSize(width * 0.0208);
     textStyle(NORMAL);
     let truthType = feedbackData.wasTruth ? "Truth" : "Myth";
     
     if (feedbackData.isEscapePenalty) {
-      text(`You let a ${truthType} fly away`, feedbackX, feedbackY + 15);
+      text(`You let a ${truthType} fly away`, feedbackX, feedbackY + width * 0.009375);
     } else {
-      text(`This one's actually a ${truthType}`, feedbackX, feedbackY + 15);
+      text(`This one's actually a ${truthType}`, feedbackX, feedbackY + width * 0.009375);
     }
   }
   
@@ -633,7 +633,7 @@ class Myth {
     // Add text shadow effect
     blendMode(MULTIPLY);
     fill(0, 0, 0, 100);
-    textSize(width * 0.032);
+    textSize(this.size*0.04);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
     text(this.text, 2, 2); // Offset for shadow effect
@@ -641,7 +641,7 @@ class Myth {
     // Myth text
     blendMode(BLEND);
     fill(colors.white);
-    textSize(width * 0.032);
+    textSize(this.size*0.04);
     text(this.text, 0, 0); // Centered at origin after translate
     textStyle(NORMAL);
 
