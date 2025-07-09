@@ -5,8 +5,19 @@ let gameFont;
 let explosionFrames = [];
 const balloonColors = ['darkblue', 'green', 'lightblue', 'midblue', 'orange', 'red', 'violet', 'yellow'];
 
+
+
 // Explosion system
 let explosions = [];
+
+// Custom p5.js loading content
+window.addEventListener('DOMContentLoaded', function() {
+  // Override p5.js loading content
+  const loadingElement = document.getElementById('p5_loading');
+  if (loadingElement) {
+    loadingElement.textContent = 'Loading...';
+  }
+});
 
 // Preload function to load all images, font and explosion frames
 function preload() {
@@ -164,7 +175,7 @@ function drawStartScreen() {
   let logoHeight = logoWidth * logo.height / logo.width;
   image(logo, logoX, logoY, logoWidth, logoHeight);
 
-  textSize(18);
+  textSize(width * 0.009375);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   fill(colors.white);
@@ -201,7 +212,7 @@ function drawInstructionScreen() {
   drawBalloon(violetBalloon.x, violetBalloon.y, violetBalloon.size, violetBalloon.color, violetBalloon.rotation);
 
   // Continue prompt
-  textSize(18);
+  textSize(width * 0.009375);
   textStyle(BOLD);
   fill(colors.white);
   textAlign(CENTER, CENTER);
@@ -264,7 +275,7 @@ function drawGameScreen() {
   // Draw score
   imageMode(CENTER);
   image(scoreBg, width * 0.85, height * 0.1, width * 0.2, width * 0.2 * (scoreBg.height / scoreBg.width));
-  textSize(40);
+  textSize(width * 0.0292);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   fill(colors.white);
@@ -338,16 +349,16 @@ function drawEndScreen() {
 
   // Display score
   fill(colors.white);
-  textSize(60);
+  textSize(width * 0.0375);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   text(score, width * 0.505, height * 0.495);
 
   // Idle timer display
   fill(colors.white);
-  textSize(20);
+  textSize(width * 0.0104);
   text("HAMMER ANY BUTTON TO RESTART", width / 2, height * 0.92);
-  textSize(12);
+  textSize(width * 0.00625);
   textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((1800 - (1800 - endScreenTimer)) / 60);
   text("Auto-restarting in " + timeLeft + "s", width / 2, height * 0.95);
@@ -371,7 +382,7 @@ function drawButton(x, y, w, h, label, bgColor, textColor) {
   // Button text
   fill(textColor);
   textAlign(CENTER, CENTER);
-  textSize(14);
+  textSize(width * 0.0073);
   textStyle(BOLD);
   text(label, x, y);
   textStyle(NORMAL);
@@ -427,19 +438,19 @@ function drawFeedback() {
   
   if (feedbackData.isCorrect) {
     // Correct feedback
-    textSize(28);
+    textSize(width * 0.0208);
     textStyle(BOLD);
     text("You got it!", feedbackX, feedbackY - 15);
     
-    textSize(32);
+    textSize(width * 0.025);
     text(`+${SCORE_VALUES.CORRECT} points`, feedbackX, feedbackY + 15);
   } else {
     // Wrong feedback
-    textSize(28);
+    textSize(width * 0.0208);
     textStyle(BOLD);
     text("Oops!", feedbackX, feedbackY - 15);
     
-    textSize(24);
+    textSize(width * 0.0208);
     textStyle(NORMAL);
     let truthType = feedbackData.wasTruth ? "Truth" : "Myth";
     
@@ -622,7 +633,7 @@ class Myth {
     // Add text shadow effect
     blendMode(MULTIPLY);
     fill(0, 0, 0, 100);
-    textSize(this.size*0.04);
+    textSize(width * 0.032);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
     text(this.text, 2, 2); // Offset for shadow effect
@@ -630,7 +641,7 @@ class Myth {
     // Myth text
     blendMode(BLEND);
     fill(colors.white);
-    textSize(this.size*0.04);
+    textSize(width * 0.032);
     text(this.text, 0, 0); // Centered at origin after translate
     textStyle(NORMAL);
 

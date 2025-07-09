@@ -11,3 +11,32 @@ body {
 canvas {
     display: block;
 }
+
+/* Font Face */
+@font-face {
+  font-family: 'CircularStd-Bold';
+  src: url('assets/CircularStd-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Custom P5.js Loader Styles */
+#p5_loading {
+  font-family: 'CircularStd-Bold', Arial, sans-serif !important;
+  background: linear-gradient(0deg, #87CEEB 0%, #d8e9f1 100%) !important;
+  color: #fff !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 3rem !important;
+  font-weight: bold !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
+}
