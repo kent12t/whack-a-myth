@@ -2,12 +2,31 @@
 let backgroundImage;
 let balloonImages = [];
 let gameFont;
+let explosionFrames = [];
 const balloonColors = ['darkblue', 'green', 'lightblue', 'midblue', 'orange', 'red', 'violet', 'yellow'];
 
-// Preload function to load all images and font
+// Explosion system
+let explosions = [];
+
+// Preload function to load all images, font and explosion frames
 function preload() {
-  backgroundImage = loadImage('assets/city4d.jpg');
+  backgroundImage = loadImage('assets/city.jpg');
   gameFont = loadFont('assets/CircularStd-Bold.otf');
+  startBtn = loadImage('assets/start.png');
+  logo = loadImage('assets/logo.png');
+  scoreBg = loadImage('assets/score.png');
+  result = loadImage('assets/result.png');
+  resultBg = loadImage('assets/result-bg.png');
+  star = loadImage('assets/star.png');
+  starShadow = loadImage('assets/star-shadow.png');
+  instruction = loadImage('assets/instruction.png');
+  instructionBg = loadImage('assets/instruction-bg.png');
+
+  // Load explosion animation frames
+  for (let i = 1; i <= 36; i++) {
+    let frameNumber = str(i).padStart(3, '0'); // Convert to 3-digit format (004, 005, etc.)
+    explosionFrames.push(loadImage(`assets/balloonpop2/frame_${frameNumber}.png`));
+  }
 
   // Load all balloon images
   for (let color of balloonColors) {
@@ -26,6 +45,7 @@ let shuffledMythList = [];
 let score = 0;
 let feedback = "";
 let feedbackTimer = 0;
+let feedbackData = null;
 let gameState = "START"; // START, PLAYING, END
 let endScreenTimer = 0;
 let idleTimer = 0;
@@ -35,7 +55,7 @@ let gameEnding = false; // Track if we're waiting for final feedback to finish
 const colors = {
   primary: '#6C5CE7',      // Vibrant purple
   secondary: '#FF6B9D',    // Hot pink
-  accent: '#FF8A5B',       // Coral orange
+  accent: '#ea5628',       // Coral orange
   success: '#00D2D3',      // Bright cyan
   warning: '#FDCB6E',      // Sunny yellow
   background: '#DDA0DD',   // Plum
@@ -56,15 +76,29 @@ const mythColors = [
 ];
 
 const mythList = [
-  { text: "Aging always means\nchronic pains", truth: false },
-  { text: "Your brain can grow\nnew cells at any age", truth: true },
-  { text: "Aging means giving\nup on goals", truth: false },
-  { text: "With aging comes\nfreedom and wisdom", truth: true },
-  { text: "Hair colour doesn't\ndefine your age", truth: true },
+  { text: "Ageing always\nmeans\nchronic pains", truth: false },
+  { text: "Your brain can\ngrow new cells\n at any age", truth: true },
+  { text: "Ageing\nmeans giving\nup on goals", truth: false },
+  { text: "With ageing\ncomes freedom\nand wisdom", truth: true },
+  { text: "Hair colour\ndoesn't define\nyour age", truth: true },
   { text: "You must act\nyour age", truth: false }
 ];
 
-const mythSize = 600;
+// Score thresholds for star rating
+const SCORE_THRESHOLDS = {
+  THREE_STARS: 0.8,  // 80% or higher
+  TWO_STARS: 0.6,    // 60% or higher
+  ONE_STAR: 0.4      // 40% or higher
+};
+
+// Scoring values
+const SCORE_VALUES = {
+  CORRECT: 20,
+  WRONG_BUTTON: -10,
+  FLY_AWAY: -5
+};
+
+const mythSize = 800;
 
 function setup() {
   if (windowWidth / windowHeight > aspectRatio) {
@@ -81,8 +115,6 @@ function setup() {
   if (gameFont) {
     textFont(gameFont);
   }
-
-  frameRate(60);
 }
 
 function windowResized() {
@@ -105,6 +137,8 @@ function draw() {
 
   if (gameState === "START") {
     drawStartScreen();
+  } else if (gameState === "INSTRUCTION") {
+    drawInstructionScreen();
   } else if (gameState === "PLAYING") {
     drawGameScreen();
   } else if (gameState === "END") {
@@ -113,48 +147,73 @@ function draw() {
 }
 
 function drawStartScreen() {
-  // Semi-transparent overlay for better text readability
-  fill(0, 0, 0, 100);
-  rect(0, 0, width, height);
-
-  // Title
-  fill(colors.white);
-  textAlign(CENTER, CENTER);
-  textSize(36);
-  textStyle(BOLD);
-  text("WHACK-A-MYTH", width / 2, height / 3);
-
-  // Subtitle
-  textSize(18);
-  textStyle(NORMAL);
-  fill(colors.background);
-  text("Bust the myths, let truths pass!", width / 2, height / 3 + 50);
-
-  // Instructions
-  textSize(16);
-  text("• Press SPACEBAR to whack MYTHS\n• Press ENTER to whack TRUTHS\n• Correct action = +1 point\n• Wrong action or letting balloons pass = -1 point", width / 2, height / 2 + 20);
+  push();
+  imageMode(CENTER);
 
   // Start button
-  drawButton(width / 2, height * 0.75, 250, 50, "PRESS SPACEBAR OR ENTER TO START", colors.accent, colors.white);
+  let startBtnX = width / 2;
+  let startBtnY = height * 0.8;
+  let startBtnWidth = width * 0.25;
+  let startBtnHeight = startBtnWidth * startBtn.height / startBtn.width;
+  image(startBtn, startBtnX, startBtnY, startBtnWidth, startBtnHeight);
 
-  // Floating myth animation
-  push();
-  translate(width * 0.8, height * 0.2 + sin(frameCount * 0.05) * 10);
-  rotate(sin(frameCount * 0.03) * 0.1);
-  fill(colors.accent + '80');
-  ellipse(0, 0, 60, 60);
-  fill(colors.white);
-  textSize(10);
+  // Title
+  let logoX = width / 2;
+  let logoY = height * 0.4 + sin(frameCount * 0.05) * 10;
+  let logoWidth = width * 0.7;
+  let logoHeight = logoWidth * logo.height / logo.width;
+  image(logo, logoX, logoY, logoWidth, logoHeight);
+
+  textSize(18);
   textAlign(CENTER, CENTER);
-  text("MYTH", 0, 0);
+  textStyle(BOLD);
+  fill(colors.white);
+  text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
+
+  pop();
+}
+
+function drawInstructionScreen() {
+  push();
+  imageMode(CENTER);
+
+  // Instruction image
+  let instructionX = width / 2;
+  let instructionY = height * 0.45;
+  let instructionWidth = width * 0.85;
+  let instructionHeight = instructionWidth * instruction.height / instruction.width;
+  blendMode(MULTIPLY);
+  image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight);
+  blendMode(BLEND);
+  image(instruction, instructionX, instructionY, instructionWidth, instructionHeight);
+
+
+  // Yellow balloon (main balloon)
+  let yellowBalloon = getAnimatedBalloon(width * 0.85, width * 0.3, 'yellow', 1, 1, 0, 5);
+  drawBalloon(yellowBalloon.x, yellowBalloon.y, yellowBalloon.size, yellowBalloon.color, yellowBalloon.rotation);
+
+  // Red balloon (0.6x size, milder motion, slightly to the right, +80 height offset)
+  let redBalloon = getAnimatedBalloon(width * 0.9, width * 0.3 * 0.6, 'red', 0.8, 0.6, 80, 7);
+  drawBalloon(redBalloon.x, redBalloon.y, redBalloon.size, redBalloon.color, redBalloon.rotation);
+
+  // Violet balloon (1.2x size, slightly offset motion, at width*0.2, +300 height offset)
+  let violetBalloon = getAnimatedBalloon(width * 0.1, width * 0.3 * 1.2, 'violet', 0.9, 0.8, 300, 8);
+  drawBalloon(violetBalloon.x, violetBalloon.y, violetBalloon.size, violetBalloon.color, violetBalloon.rotation);
+
+  // Continue prompt
+  textSize(18);
+  textStyle(BOLD);
+  fill(colors.white);
+  textAlign(CENTER, CENTER);
+  text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
+
   pop();
 }
 
 function drawGameScreen() {
-  // No additional background processing needed - using city4d image
-
-  // Draw current myth if it exists
-  if (currentMyth) {
+  push();
+  // Draw current myth if it exists and hasn't been busted
+  if (currentMyth && !currentMyth.busted) {
     currentMyth.draw();
 
     // Check if current myth is off screen and create next one
@@ -162,17 +221,28 @@ function drawGameScreen() {
       // Handle scoring for balloons that passed by
       if (!currentMyth.busted) {
         // Any balloon that passes by without being hit is now penalized
-        score--;
-        if (currentMyth.truth) {
-          feedback = "You let a TRUTH escape!\nYou should have pressed ENTER\n-1 point";
-        } else {
-          feedback = "You let a MYTH escape!\nYou should have pressed SPACEBAR\n-1 point";
-        }
+        score += SCORE_VALUES.FLY_AWAY;
+        feedbackData = {
+          balloonX: currentMyth.x,
+          balloonY: currentMyth.y,
+          balloonSize: currentMyth.size,
+          isCorrect: false,
+          wasTruth: currentMyth.truth,
+          isEscapePenalty: true // Flag to indicate this is an escape penalty
+        };
         feedbackTimer = 120;
       }
 
       // Always create next myth (or trigger end if no more myths)
       createNextMyth();
+    }
+  }
+
+  // Draw and update explosions
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    explosions[i].draw();
+    if (explosions[i].isComplete) {
+      explosions.splice(i, 1); // Remove completed explosions
     }
   }
 
@@ -185,74 +255,102 @@ function drawGameScreen() {
     }
   }
 
-  // UI Header
-  fill(colors.primary);
-  rect(0, 0, width, 80);
-
-  // Score display
-  fill(colors.white);
-  textSize(24);
-  textAlign(LEFT, CENTER);
-  text("Score: " + score, 20, 40);
-
-  // Progress indicator
-  textAlign(RIGHT, CENTER);
-  text((currentMythIndex) + "/" + shuffledMythList.length, width - 20, 40);
-
-  // Instructions
-  fill(colors.text);
-  textSize(14);
-  textAlign(CENTER, TOP);
-  text("SPACEBAR for MYTHS | ENTER for TRUTHS", width / 2, 90);
-
   // Display feedback
   if (feedbackTimer > 0) {
     drawFeedback();
     feedbackTimer--;
   }
+
+  // Draw score
+  imageMode(CENTER);
+  image(scoreBg, width * 0.85, height * 0.1, width * 0.2, width * 0.2 * (scoreBg.height / scoreBg.width));
+  textSize(40);
+  textAlign(CENTER, CENTER);
+  textStyle(BOLD);
+  fill(colors.white);
+  text(score, width * (0.85+0.068), height * (0.1 - 0.017));
+  pop();
+}
+
+function drawStarRating() {
+  // Calculate number of stars based on score
+  let scorePercentage = score / shuffledMythList.length;
+  let starCount = 0;
+  
+  if (scorePercentage >= SCORE_THRESHOLDS.THREE_STARS) {
+    starCount = 3;
+  } else if (scorePercentage >= SCORE_THRESHOLDS.TWO_STARS) {
+    starCount = 2;
+  } else if (scorePercentage >= SCORE_THRESHOLDS.ONE_STAR) {
+    starCount = 1;
+  }
+  
+  // Star positioning
+  let starY = height * 0.15;
+  let starSize = width * 0.11;
+  let starSpacing = starSize * 1.2;
+  let centerX = width / 2;
+  
+  // Star positions (left, center, right)
+  let starPositions = [
+    { x: centerX - starSpacing, rotation: -0.15, y: starY + starSize * 0.1 }, // Left star (counter-clockwise)
+    { x: centerX, rotation: 0, y: starY - starSize * 0.1 },                   // Center star (no rotation)
+    { x: centerX + starSpacing, rotation: 0.15, y: starY + starSize * 0.1 }   // Right star (clockwise)
+  ];
+  
+  push();
+  imageMode(CENTER);
+  
+  // Draw all star shadows first
+  for (let i = 0; i < 3; i++) {
+    let pos = starPositions[i];
+    push();
+    translate(pos.x, pos.y);
+    rotate(pos.rotation);
+    image(starShadow, 0, 0, starSize, starSize);
+    pop();
+  }
+  
+  // Draw actual stars based on score
+  for (let i = 0; i < starCount; i++) {
+    let pos = starPositions[i];
+    push();
+    translate(pos.x, pos.y);
+    rotate(pos.rotation);
+    image(star, 0, 0, starSize, starSize);
+    pop();
+  }
+  
+  pop();
 }
 
 function drawEndScreen() {
-  // Semi-transparent overlay for better text readability
-  fill(0, 0, 0, 120);
-  rect(0, 0, width, height);
+  push();
+  imageMode(CENTER);
+  blendMode(MULTIPLY);
+  image(resultBg, width / 2, height / 2, width * 0.8, width * 0.8 * (resultBg.height / resultBg.width));
+  blendMode(BLEND);
+  image(result, width / 2, height / 2, width * 0.8, width * 0.8 * (result.height / result.width));
+  pop();
 
-  // Game Over title
+  // Draw star rating at top of screen
+  drawStarRating();
+
+  // Display score
   fill(colors.white);
+  textSize(60);
   textAlign(CENTER, CENTER);
-  textSize(32);
   textStyle(BOLD);
-  text("GAME COMPLETE!", width / 2, height / 4);
-
-  // Final score
-  textSize(48);
-  text(score, width / 2, height / 2 - 20);
-  textSize(18);
-  text("Final Score", width / 2, height / 2 + 20);
-
-  // Performance message
-  textSize(16);
-  let message = "";
-  if (score >= shuffledMythList.length * 0.8) {
-    message = "Excellent myth-busting skills!";
-    fill(colors.success);
-  } else if (score >= shuffledMythList.length * 0.5) {
-    message = "Good job! Keep practicing.";
-    fill(colors.warning);
-  } else {
-    message = "Room for improvement!";
-    fill(colors.accent);
-  }
-  text(message, width / 2, height / 2 + 50);
-
-  // Restart button
-  drawButton(width / 2, height * 0.75, 280, 50, "PRESS SPACEBAR OR ENTER TO RESTART", colors.accent, colors.white);
+  text(score, width * 0.505, height * 0.495);
 
   // Idle timer display
   fill(colors.white);
+  textSize(20);
+  text("HAMMER ANY BUTTON TO RESTART", width / 2, height * 0.92);
   textSize(12);
+  textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((1800 - (1800 - endScreenTimer)) / 60);
-  text("Returning to start in " + timeLeft + "s", width / 2, height * 0.9);
+  text("Auto-restarting in " + timeLeft + "s", width / 2, height * 0.95);
 
   // Handle idle timer
   endScreenTimer--;
@@ -280,32 +378,78 @@ function drawButton(x, y, w, h, label, bgColor, textColor) {
 }
 
 function drawFeedback() {
+  if (!feedbackData) return;
 
   push();
-
   noStroke();
+  
   // Smooth fading animation
   let fadeAlpha = map(feedbackTimer, 0, 120, 0, 255);
   fadeAlpha = constrain(fadeAlpha, 0, 255);
 
-  // Feedback background with smooth fade
-  fill(red(color(colors.white)), green(color(colors.white)), blue(color(colors.white)), fadeAlpha);
-  rect(width / 4, height / 3, width / 2, 80, 10);
+  // Calculate feedback position based on balloon position
+  let feedbackX = feedbackData.balloonX;
+  let feedbackY = feedbackData.balloonY - feedbackData.balloonSize * 0.2; // Slightly above balloon
 
-  // Feedback text with smooth fade
-  textAlign(CENTER, CENTER);
-  textSize(18);
-  textStyle(BOLD);
-
-  let textColor;
-  if (feedback.includes("Wrong") || feedback.includes("escape")) {
-    textColor = color(colors.accent);
+  // Adjust X position to avoid going off screen
+  if (feedbackData.balloonX > width / 2) {
+    // Balloon on right side, show feedback to the left
+    feedbackX = feedbackData.balloonX - feedbackData.balloonSize * 0.2;
   } else {
-    textColor = color(colors.success);
+    // Balloon on left side, show feedback to the right
+    feedbackX = feedbackData.balloonX + feedbackData.balloonSize * 0.2;
   }
 
-  fill(red(textColor), green(textColor), blue(textColor), fadeAlpha);
-  text(feedback, width / 2, height / 3 + 40);
+  // Scoreboard bounds (center at width * 0.85, height * 0.1, size width * 0.2)
+  let scoreboardLeft = width * 0.85 - (width * 0.2) / 2;
+  let scoreboardRight = width * 0.85 + (width * 0.2) / 2;
+  let scoreboardTop = height * 0.1 - (width * 0.2 * (scoreBg.height / scoreBg.width)) / 2;
+  let scoreboardBottom = height * 0.1 + (width * 0.2 * (scoreBg.height / scoreBg.width)) / 2;
+
+  // Check if feedback would overlap with scoreboard and adjust
+  if (feedbackX > scoreboardLeft - 100 && feedbackX < scoreboardRight + 100 && 
+      feedbackY > scoreboardTop - 50 && feedbackY < scoreboardBottom + 50) {
+    // Move feedback away from scoreboard
+    if (feedbackData.balloonX > width * 0.75) {
+      feedbackX = scoreboardLeft - 120; // Move to left of scoreboard
+    } else {
+      feedbackY = scoreboardBottom + 80; // Move below scoreboard
+    }
+  }
+
+  // Keep feedback within screen bounds
+  feedbackX = constrain(feedbackX, 80, width - 80);
+  feedbackY = constrain(feedbackY, 60, height - 60);
+
+  // Feedback text with smooth fade using colors.accent
+  textAlign(CENTER, CENTER);
+  fill(red(color(colors.accent)), green(color(colors.accent)), blue(color(colors.accent)), fadeAlpha);
+  
+  if (feedbackData.isCorrect) {
+    // Correct feedback
+    textSize(28);
+    textStyle(BOLD);
+    text("You got it!", feedbackX, feedbackY - 15);
+    
+    textSize(32);
+    text(`+${SCORE_VALUES.CORRECT} points`, feedbackX, feedbackY + 15);
+  } else {
+    // Wrong feedback
+    textSize(28);
+    textStyle(BOLD);
+    text("Oops!", feedbackX, feedbackY - 15);
+    
+    textSize(24);
+    textStyle(NORMAL);
+    let truthType = feedbackData.wasTruth ? "Truth" : "Myth";
+    
+    if (feedbackData.isEscapePenalty) {
+      text(`You let a ${truthType} fly away`, feedbackX, feedbackY + 15);
+    } else {
+      text(`This one's actually a ${truthType}`, feedbackX, feedbackY + 15);
+    }
+  }
+  
   textStyle(NORMAL);
   pop();
 }
@@ -329,7 +473,9 @@ function startGame() {
   currentMyth = null;
   feedback = "";
   feedbackTimer = 0;
+  feedbackData = null;
   gameEnding = false; // Reset the ending flag
+  explosions = []; // Clear any existing explosions
   shuffledMythList = shuffle(mythList);
   createNextMyth();
 }
@@ -337,6 +483,8 @@ function startGame() {
 function keyPressed() {
   if (key === ' ' || keyCode === ENTER) {
     if (gameState === "START") {
+      gameState = "INSTRUCTION";
+    } else if (gameState === "INSTRUCTION") {
       startGame();
     } else if (gameState === "PLAYING") {
       if (currentMyth && !currentMyth.isOffScreen()) {
@@ -347,27 +495,56 @@ function keyPressed() {
           // Spacebar pressed - should be used for MYTHS (false)
           if (!currentMyth.truth) {
             // Correctly whacked a myth
-            score++;
-            feedback = "Great! You whacked a MYTH!\n+1 point";
+            score += SCORE_VALUES.CORRECT;
+            feedbackData = {
+              balloonX: currentMyth.x,
+              balloonY: currentMyth.y,
+              balloonSize: currentMyth.size,
+              isCorrect: true,
+              wasTruth: currentMyth.truth
+            };
             correctAction = true;
           } else {
             // Wrong - tried to whack a truth with spacebar
-            score--;
-            feedback = "Wrong! That was a TRUTH!\nUse ENTER for truths\n-1 point";
+            score += SCORE_VALUES.WRONG_BUTTON;
+            feedbackData = {
+              balloonX: currentMyth.x,
+              balloonY: currentMyth.y,
+              balloonSize: currentMyth.size,
+              isCorrect: false,
+              wasTruth: currentMyth.truth,
+              isEscapePenalty: false // This is a wrong button press, not escape
+            };
           }
-        } else if (keyCode === ENTER) {
+                } else if (keyCode === ENTER) {
           // Enter pressed - should be used for TRUTHS (true)
           if (currentMyth.truth) {
             // Correctly whacked a truth
-            score++;
-            feedback = "Excellent! You whacked a TRUTH!\n+1 point";
+            score += SCORE_VALUES.CORRECT;
+            feedbackData = {
+              balloonX: currentMyth.x,
+              balloonY: currentMyth.y,
+              balloonSize: currentMyth.size,
+              isCorrect: true,
+              wasTruth: currentMyth.truth
+            };
             correctAction = true;
           } else {
             // Wrong - tried to whack a myth with enter
-            score--;
-            feedback = "Wrong! That was a MYTH!\nUse SPACEBAR for myths\n-1 point";
+            score += SCORE_VALUES.WRONG_BUTTON;
+            feedbackData = {
+              balloonX: currentMyth.x,
+              balloonY: currentMyth.y,
+              balloonSize: currentMyth.size,
+              isCorrect: false,
+              wasTruth: currentMyth.truth,
+              isEscapePenalty: false // This is a wrong button press, not escape
+            };
           }
         }
+
+        // Create explosion at balloon location
+        explosions.push(new Explosion(currentMyth.x, currentMyth.y, currentMyth.size));
 
         feedbackTimer = 120;
         currentMyth.busted = true; // Mark as busted
@@ -377,6 +554,23 @@ function keyPressed() {
       startGame();
     }
   }
+}
+
+function drawBalloon(x, y, size, color, rotation = 0) {
+  push();
+  translate(x, y);
+  rotate(rotation);
+  imageMode(CENTER);
+  image(balloonImages[balloonColors.indexOf(color)], 0, 0, size, size);
+  pop();
+}
+
+function getAnimatedBalloon(baseX, baseSize, color, speedMultiplier = 1, motionMultiplier = 1, heightOffset = 0, rotationLag = 5, currentY = null) {
+  let x = baseX + sin(frameCount * 0.04 * speedMultiplier) * (10 * motionMultiplier);
+  let y = currentY !== null ? currentY : height * 1 - ((frameCount * 3 * speedMultiplier) + heightOffset) % (height + 100);
+  let rotation = cos((frameCount - rotationLag) * 0.04 * speedMultiplier) * (0.1 * motionMultiplier);
+
+  return { x, y, size: baseSize, color, rotation };
 }
 
 class Myth {
@@ -389,79 +583,106 @@ class Myth {
    */
 
   constructor(x, y, size, truth, text) {
+    this.baseX = x; // Store original X position for animation
     this.x = x;
     this.y = y;
     this.size = size;
     this.truth = truth;
     this.text = text;
-    this.speed = random(2, 4);
-    this.baseSpeed = this.speed;
-    this.color = random(mythColors); // Keep for fallback
-    this.balloonImage = random(balloonImages); // Random balloon image
-    this.driftX = 0; // For brownian motion
-    this.driftSpeed = random(0.5, 1.5); // How fast the drift changes
+    this.speed = random(2, 3);
+    this.color = random(balloonColors); // Use balloon colors for consistent theming
     this.busted = false; // Track if this myth was busted
-    this.driftAmount = 0.5;
+    this.motionMultiplier = random(0.4, 0.8); // Random motion intensity
+    this.rotationLag = random(3, 8); // Random rotation lag
   }
 
   draw() {
+    // Update position using getAnimatedBalloon for consistent motion
+    this.y -= this.speed; // Continue upward movement
 
-    // Apply drift
-    if (0.1 > random(0, 1)) {
-      // Brownian motion - floating balloon effect change with random 10% chance
-      this.driftX += random(-this.driftSpeed, this.driftSpeed);
-      this.driftX = constrain(this.driftX, -this.driftAmount, this.driftAmount); // Limit horizontal drift
-    }
-
-    this.x += this.driftX;
+    // Get animated balloon properties (swaying and rotation)
+    let animatedProps = getAnimatedBalloon(this.baseX, this.size, this.color, 1, this.motionMultiplier, 0, this.rotationLag, this.y);
+    this.x = animatedProps.x;
 
     // Keep balloons within screen bounds
     this.x = constrain(this.x, this.size / 2, width - this.size / 2);
 
-    // Draw balloon image if available, otherwise fallback to circles
-    if (this.balloonImage && balloonImages.length > 0) {
-      // Main balloon image
-      tint(255, 255, 255, 230);
-      image(this.balloonImage, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
-      noTint(); // Reset tint
-    } else {
-      // Fallback to original circle drawing
-      fill(0, 0, 0, 30);
-      ellipse(this.x + 4, this.y + 4, this.size, this.size);
+    // Draw both balloon and text with rotation around text center (this.y - this.size / 7)
+    push();
+    translate(this.x, this.y - this.size / 7); // Move to text center (the pivot point)
+    rotate(animatedProps.rotation); // Apply rotation
 
-      fill(this.color + 'E6');
-      ellipse(this.x, this.y, this.size, this.size);
-
-      stroke(colors.white);
-      strokeWeight(4);
-      noFill();
-      ellipse(this.x, this.y, this.size, this.size);
-      noStroke();
-
-      fill(this.color + '40');
-      ellipse(this.x, this.y, this.size * 0.7, this.size * 0.7);
-    }
-
+    // Draw balloon offset from the text center
+    push();
+    translate(0, this.size / 7); // Move balloon back to its position relative to text
+    imageMode(CENTER);
+    image(balloonImages[balloonColors.indexOf(this.color)], 0, 0, this.size, this.size);
+    pop();
 
     // Add text shadow effect
+    blendMode(MULTIPLY);
     fill(0, 0, 0, 100);
-    textSize(20);
+    textSize(this.size*0.04);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
-    text(this.text, this.x + 2, this.y - this.size /7 + 2);
-
+    text(this.text, 2, 2); // Offset for shadow effect
+    
     // Myth text
+    blendMode(BLEND);
     fill(colors.white);
-    textSize(20); 
-    text(this.text, this.x, this.y - this.size /7);
+    textSize(this.size*0.04);
+    text(this.text, 0, 0); // Centered at origin after translate
     textStyle(NORMAL);
 
-    this.y -= this.speed;
+    pop();
   }
 
   isOffScreen() {
     // Consider balloons off-screen earlier (when they're still partially visible)
-    return this.y < -this.size*0.1;
+    return this.y < -this.size * 0.1;
+  }
+}
+
+class Explosion {
+  constructor(x, y, size) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.startTime = millis();
+    this.frameDuration = 12;
+    this.totalFrames = explosionFrames.length;
+    this.duration = this.totalFrames * this.frameDuration;
+    this.isComplete = false;
+  }
+
+  draw() {
+    if (this.isComplete) return;
+
+    let elapsed = millis() - this.startTime;
+    if (elapsed >= this.duration) {
+      this.isComplete = true;
+      return;
+    }
+
+    // Calculate which frame to show
+    let frameIndex = Math.floor(elapsed / this.frameDuration);
+    frameIndex = constrain(frameIndex, 0, this.totalFrames - 1);
+
+    // Draw the current explosion frame
+    if (explosionFrames[frameIndex]) {
+      push();
+      translate(this.x, this.y);
+
+      // Calculate proper 16:9 aspect ratio dimensions
+      let explosionScale = this.size * 0.6; // Scale factor for explosion size
+      let explosionWidth = explosionScale * (16 / 9); // Width based on 16:9 ratio
+      let explosionHeight = explosionScale; // Height
+
+      // Draw explosion frame centered at the explosion point with correct aspect ratio
+      image(explosionFrames[frameIndex], -explosionWidth / 2, -explosionHeight * 0.7, explosionWidth, explosionHeight);
+
+      pop();
+    }
   }
 }
 
