@@ -109,7 +109,7 @@ const SCORE_VALUES = {
   FLY_AWAY: -5
 };
 
-const mythSize = 800;
+let mythSize;
 
 function setup() {
   if (windowWidth / windowHeight > aspectRatio) {
@@ -121,6 +121,8 @@ function setup() {
     currentHeight = windowWidth / aspectRatio;
     createCanvas(currentWidth, currentHeight);
   }
+
+  mythSize = width * 0.6;
 
   // Apply the custom font
   if (gameFont) {
@@ -600,7 +602,7 @@ class Myth {
     this.size = size;
     this.truth = truth;
     this.text = text;
-    this.speed = random(2, 3);
+    this.speed = random(2 * (height / 1080), 3 * (height / 1080));
     this.color = random(balloonColors); // Use balloon colors for consistent theming
     this.busted = false; // Track if this myth was busted
     this.motionMultiplier = random(0.4, 0.8); // Random motion intensity
