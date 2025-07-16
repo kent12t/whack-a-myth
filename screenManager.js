@@ -33,8 +33,8 @@ function drawInstructionScreen() {
 
   // Instruction image
   let instructionX = width / 2;
-  let instructionY = height * 0.45;
-  let instructionWidth = width * 0.85;
+  let instructionY = height / 2;
+  let instructionWidth = width * 1;
   let instructionHeight = instructionWidth * instruction.height / instruction.width;
   blendMode(MULTIPLY);
   image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight);
