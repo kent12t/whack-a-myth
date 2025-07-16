@@ -72,7 +72,7 @@ function keyPressed() {
         }
         break;
       case GAME_STATES.END:
-        startGame();
+        gameState = GAME_STATES.START;
         break;
     }
   }
