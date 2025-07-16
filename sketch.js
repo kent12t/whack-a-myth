@@ -1,5 +1,9 @@
 // Main game coordinator - imports all modules and manages p5.js lifecycle
 
+// Serial communication variables
+let serial;
+let latestData = "waiting for data";
+
 function setup() {
   if (windowWidth / windowHeight > GAME_CONFIG.aspectRatio) {
     currentWidth = windowHeight * GAME_CONFIG.aspectRatio;
@@ -17,6 +21,9 @@ function setup() {
   if (gameFont) {
     textFont(gameFont);
   }
+
+  // Initialize serial communication
+  initializeSerial();
 }
 
 function windowResized() {
@@ -69,6 +76,80 @@ function keyPressed() {
           handleBalloonHit(true); // Space pressed
         } else if (keyCode === ENTER) {
           handleBalloonHit(false); // Enter pressed
+        }
+        break;
+      case GAME_STATES.END:
+        gameState = GAME_STATES.START;
+        break;
+    }
+  }
+}
+
+// Serial communication functions
+function initializeSerial() {
+  // Instantiate our SerialPort object
+  serial = new p5.SerialPort();
+
+  // Get a list the ports available
+  serial.list();
+
+  // Open connection to Arduino on COM5
+  serial.open("COM5");
+
+  // Set up event callbacks
+  serial.on('connected', serverConnected);
+  serial.on('list', gotList);
+  serial.on('data', gotData);
+  serial.on('error', gotError);
+  serial.on('open', gotOpen);
+  serial.on('close', gotClose);
+}
+
+function serverConnected() {
+  print("Connected to Server");
+}
+
+function gotList(thelist) {
+  print("List of Serial Ports:");
+  for (let i = 0; i < thelist.length; i++) {
+    print(i + " " + thelist[i]);
+  }
+}
+
+function gotOpen() {
+  print("Serial Port is Open");
+}
+
+function gotClose() {
+  print("Serial Port is Closed");
+  latestData = "Serial Port is Closed";
+}
+
+function gotError(theerror) {
+  print(theerror);
+}
+
+function gotData() {
+  let currentString = serial.readLine();
+  trim(currentString);
+  if (!currentString) return;
+  console.log(currentString);
+  latestData = currentString;
+  
+  // Handle Arduino input for all game states
+  if (currentString === "0" || currentString === "1") {
+    switch (gameState) {
+      case GAME_STATES.START:
+        gameState = GAME_STATES.INSTRUCTION;
+        break;
+      case GAME_STATES.INSTRUCTION:
+        startGame();
+        break;
+      case GAME_STATES.PLAYING:
+        if (currentString === "0") {
+          handleBalloonHit(true); // Button 1 (wrong) should act like spacebar for MYTHS
+        } else if (currentString === "1") {
+          handleBalloonHit(false); // Button 2 (correct) should act like enter for TRUTHS
         }
         break;
       case GAME_STATES.END:
