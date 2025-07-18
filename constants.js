@@ -30,7 +30,7 @@ const MYTH_COLORS = [
 
 // Game data
 const MYTH_LIST = [
-  { text: "Ageing always\nmeans\nchronic pains", truth: false },
+  { text: "Ageing\nalways means\nchronic pains", truth: false },
   { text: "Your brain can\ngrow new cells\n at any age", truth: true },
   { text: "Ageing\nmeans giving\nup on goals", truth: false },
   { text: "With ageing\ncomes freedom\nand wisdom", truth: true },
