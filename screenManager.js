@@ -36,9 +36,7 @@ function drawInstructionScreen() {
   let instructionY = height / 2;
   let instructionWidth = width * 1;
   let instructionHeight = instructionWidth * instruction.height / instruction.width;
-  blendMode(MULTIPLY);
-  image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight);
-  blendMode(BLEND);
+  image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight)
   image(instruction, instructionX, instructionY, instructionWidth, instructionHeight);
 
   // Yellow balloon (main balloon) - smooth upward floating
@@ -142,22 +140,16 @@ function drawEndScreen() {
   
   if (isPerfectScore) {
     // Perfect score - center the result section
-    blendMode(MULTIPLY);
     image(resultBg, width * 0.5, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
-    blendMode(BLEND);
     image(result, width * 0.5, height / 2, height * 0.7 * (result.width / result.height), height * 0.7);
   } else {
     // Has missed balloons - show both result and report sections
     // Result section - centered on width * 0.3
-    blendMode(MULTIPLY);
     image(resultBg, width * 0.3, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
-    blendMode(BLEND);
     image(result, width * 0.3, height / 2, height * 0.7 * (result.width / result.height), height * 0.7);
 
     // Report section - centered on width * 0.75
-    blendMode(MULTIPLY);
     image(reportBg, width * 0.75, height / 2, height * 0.7 * (reportBg.width / reportBg.height), height * 0.7);
-    blendMode(BLEND);
     image(report, width * 0.75, height / 2, height * 0.7 * (report.width / report.height), height * 0.7);
   }
 
@@ -324,8 +316,8 @@ function drawMissedBalloons() {
     
     // Add animated sine wave bounce with offset for each balloon
     const timeOffset = i * 30; // Different phase for each balloon
-    const bounceY = sin((frameCount + timeOffset) * 0.08) * 8;
-    const bounceX = cos((frameCount + timeOffset) * 0.06) * 4;
+    const bounceY = sin((frameCount + timeOffset) * 0.06) * 8;
+    const bounceX = cos((frameCount + timeOffset) * 0.04) * 4;
     
     const x = baseX + bounceX;
     const y = baseY + bounceY;

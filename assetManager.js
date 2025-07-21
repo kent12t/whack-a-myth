@@ -27,7 +27,7 @@ function preload() {
   star = loadImage('assets/star.png');
   starShadow = loadImage('assets/star-shadow.png');
   instruction = loadImage('assets/instruction.png');
-  instructionBg = loadImage('assets/instruction-bg.png');
+  instructionBg = loadImage('assets/instruction-bg-2.png');
 
   // Load explosion animation frames
   for (let i = 1; i <= 36; i++) {
