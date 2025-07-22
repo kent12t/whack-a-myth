@@ -112,7 +112,7 @@ function playWrongWithPop() {
     setTimeout(() => {
       wrongSound.setVolume(0.6);
       wrongSound.play();
-    }, 167); // 10 frames at 60fps = 167ms
+    }, 120); // 10 frames at 60fps = 167ms
   }
 }
 
