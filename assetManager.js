@@ -53,7 +53,7 @@ function preload() {
 // Music control functions
 function startBackgroundMusic() {
   if (backgroundMusic && !backgroundMusic.isPlaying()) {
-    backgroundMusic.setVolume(0.01); // Set volume to 10%
+    backgroundMusic.setVolume(0.03); // Set volume to 10%
     backgroundMusic.loop(); // Loop the music continuously
   }
 }
@@ -88,7 +88,7 @@ function playPopSound() {
   // Delay correct sound by 10 frames (approximately 167ms at 60fps)
   if (correctSound) {
     setTimeout(() => {
-      correctSound.setVolume(0.4);
+      correctSound.setVolume(0.25);
       correctSound.play();
     }, 167); // 10 frames at 60fps = 167ms
   }
