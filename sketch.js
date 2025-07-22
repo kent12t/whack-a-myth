@@ -63,13 +63,20 @@ function draw() {
 }
 
 function keyPressed() {
+  // Start background music on first user interaction (if not already playing)
+  if (backgroundMusic && !backgroundMusic.isPlaying()) {
+    startBackgroundMusic();
+  }
+  
   if (key === ' ' || keyCode === ENTER) {
     switch (gameState) {
       case GAME_STATES.START:
         gameState = GAME_STATES.INSTRUCTION;
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
       case GAME_STATES.INSTRUCTION:
         startGame();
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
       case GAME_STATES.PLAYING:
         if (key === ' ') {
@@ -80,6 +87,7 @@ function keyPressed() {
         break;
       case GAME_STATES.END:
         gameState = GAME_STATES.START;
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
     }
   }
@@ -138,12 +146,19 @@ function gotData() {
   
   // Handle Arduino input for all game states
   if (currentString === "0" || currentString === "1") {
+    // Start background music on first Arduino interaction (if not already playing)
+    if (backgroundMusic && !backgroundMusic.isPlaying()) {
+      startBackgroundMusic();
+    }
+    
     switch (gameState) {
       case GAME_STATES.START:
         gameState = GAME_STATES.INSTRUCTION;
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
       case GAME_STATES.INSTRUCTION:
         startGame();
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
       case GAME_STATES.PLAYING:
         if (currentString === "0") {
@@ -154,6 +169,7 @@ function gotData() {
         break;
       case GAME_STATES.END:
         gameState = GAME_STATES.START;
+        playUIProgressSound(); // Play pop sound for UI progression
         break;
     }
   }

@@ -74,6 +74,9 @@ function handleBalloonHit(isSpacePressed) {
       wasTruth: currentMyth.truth
     };
     correctAction = true;
+    
+    // Play pop sound for correct hit
+    playPopSound();
   } else {
     // Wrong action
     score += SCORE_VALUES.WRONG_BUTTON;
@@ -93,6 +96,9 @@ function handleBalloonHit(isSpacePressed) {
       color: currentMyth.color,
       missType: 'WRONG_BUTTON'
     });
+    
+    // Play both pop (softer) and wrong sound for wrong button press
+    playWrongWithPop();
   }
 
   // Create explosion at balloon location

@@ -90,6 +90,9 @@ function drawGameScreen() {
           color: currentMyth.color,
           missType: 'FLY_AWAY'
         });
+        
+        // Play wrong sound for balloon that flew away
+        playWrongSound();
       }
 
       // Always create next myth (or trigger end if no more myths)

@@ -67,7 +67,7 @@ class Myth {
     pop();
 
     // Add text shadow effect
-    blendMode(MULTIPLY);
+
     fill(0, 0, 0, 100);
     textSize(this.size * 0.04);
     textAlign(CENTER, CENTER);
