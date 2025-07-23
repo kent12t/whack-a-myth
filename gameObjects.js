@@ -131,4 +131,8 @@ class Explosion {
       pop();
     }
   }
-} 
+}
+
+// Make classes globally available for p5.js compatibility
+window.Myth = Myth;
+window.Explosion = Explosion; 

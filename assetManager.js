@@ -1,9 +1,121 @@
 // Asset management
-let balloonImages = [];
-let explosionFrames = [];
-let backgroundImage, gameFont, startBtn, logo, scoreBg, result, resultBg;
-let report, reportBg, star, starShadow, instruction, instructionBg;
-let backgroundMusic, popSound, wrongSound, correctSound;
+const assets = {
+  balloonImages: [],
+  explosionFrames: [],
+  backgroundImage: null,
+  gameFont: null,
+  startBtn: null,
+  logo: null,
+  scoreBg: null,
+  result: null,
+  resultBg: null,
+  report: null,
+  reportBg: null,
+  star: null,
+  starShadow: null,
+  instruction: null,
+  instructionBg: null,
+  backgroundMusic: null,
+  popSound: null,
+  wrongSound: null,
+  correctSound: null
+};
+
+// Make assets globally accessible with synchronization
+Object.defineProperty(window, 'balloonImages', {
+  get: () => assets.balloonImages,
+  set: (value) => assets.balloonImages = value
+});
+
+Object.defineProperty(window, 'explosionFrames', {
+  get: () => assets.explosionFrames,
+  set: (value) => assets.explosionFrames = value
+});
+
+Object.defineProperty(window, 'backgroundImage', {
+  get: () => assets.backgroundImage,
+  set: (value) => assets.backgroundImage = value
+});
+
+Object.defineProperty(window, 'gameFont', {
+  get: () => assets.gameFont,
+  set: (value) => assets.gameFont = value
+});
+
+Object.defineProperty(window, 'startBtn', {
+  get: () => assets.startBtn,
+  set: (value) => assets.startBtn = value
+});
+
+Object.defineProperty(window, 'logo', {
+  get: () => assets.logo,
+  set: (value) => assets.logo = value
+});
+
+Object.defineProperty(window, 'scoreBg', {
+  get: () => assets.scoreBg,
+  set: (value) => assets.scoreBg = value
+});
+
+Object.defineProperty(window, 'result', {
+  get: () => assets.result,
+  set: (value) => assets.result = value
+});
+
+Object.defineProperty(window, 'resultBg', {
+  get: () => assets.resultBg,
+  set: (value) => assets.resultBg = value
+});
+
+Object.defineProperty(window, 'report', {
+  get: () => assets.report,
+  set: (value) => assets.report = value
+});
+
+Object.defineProperty(window, 'reportBg', {
+  get: () => assets.reportBg,
+  set: (value) => assets.reportBg = value
+});
+
+Object.defineProperty(window, 'star', {
+  get: () => assets.star,
+  set: (value) => assets.star = value
+});
+
+Object.defineProperty(window, 'starShadow', {
+  get: () => assets.starShadow,
+  set: (value) => assets.starShadow = value
+});
+
+Object.defineProperty(window, 'instruction', {
+  get: () => assets.instruction,
+  set: (value) => assets.instruction = value
+});
+
+Object.defineProperty(window, 'instructionBg', {
+  get: () => assets.instructionBg,
+  set: (value) => assets.instructionBg = value
+});
+
+Object.defineProperty(window, 'backgroundMusic', {
+  get: () => assets.backgroundMusic,
+  set: (value) => assets.backgroundMusic = value
+});
+
+Object.defineProperty(window, 'popSound', {
+  get: () => assets.popSound,
+  set: (value) => assets.popSound = value
+});
+
+Object.defineProperty(window, 'wrongSound', {
+  get: () => assets.wrongSound,
+  set: (value) => assets.wrongSound = value
+});
+
+Object.defineProperty(window, 'correctSound', {
+  get: () => assets.correctSound,
+  set: (value) => assets.correctSound = value
+});
 
 // Custom p5.js loading content
 window.addEventListener('DOMContentLoaded', function () {
@@ -16,110 +128,119 @@ window.addEventListener('DOMContentLoaded', function () {
 
 // Preload function to load all images, font and explosion frames
 function preload() {
-  backgroundImage = loadImage('assets/city.jpg');
-  gameFont = loadFont('assets/CircularStd-Bold.otf');
-  startBtn = loadImage('assets/start.png');
-  logo = loadImage('assets/logo.png');
-  scoreBg = loadImage('assets/score.png');
-  result = loadImage('assets/result.png');
-  resultBg = loadImage('assets/result-bg.png');
-  report = loadImage('assets/report.png');
-  reportBg = loadImage('assets/report-bg.png');
-  star = loadImage('assets/star.png');
-  starShadow = loadImage('assets/star-shadow.png');
-  instruction = loadImage('assets/instruction.png');
-  instructionBg = loadImage('assets/instruction-bg.png');
+  assets.backgroundImage = loadImage('assets/city.jpg');
+  assets.gameFont = loadFont('assets/CircularStd-Bold.otf');
+  assets.startBtn = loadImage('assets/start.png');
+  assets.logo = loadImage('assets/logo.png');
+  assets.scoreBg = loadImage('assets/score.png');
+  assets.result = loadImage('assets/result.png');
+  assets.resultBg = loadImage('assets/result-bg.png');
+  assets.report = loadImage('assets/report.png');
+  assets.reportBg = loadImage('assets/report-bg.png');
+  assets.star = loadImage('assets/star.png');
+  assets.starShadow = loadImage('assets/star-shadow.png');
+  assets.instruction = loadImage('assets/instruction.png');
+  assets.instructionBg = loadImage('assets/instruction-bg.png');
   
   // Load background music
-  backgroundMusic = loadSound('assets/slimetime_01.aac');
+  assets.backgroundMusic = loadSound('assets/slimetime_01.aac');
   
   // Load sound effects
-  popSound = loadSound('assets/pop.aac');
-  wrongSound = loadSound('assets/wrong.aac');
-  correctSound = loadSound('assets/correct.aac');
+  assets.popSound = loadSound('assets/pop.aac');
+  assets.wrongSound = loadSound('assets/wrong.aac');
+  assets.correctSound = loadSound('assets/correct.aac');
 
   // Load explosion animation frames
   for (let i = 1; i <= 36; i++) {
     let frameNumber = str(i).padStart(3, '0'); // Convert to 3-digit format (004, 005, etc.)
-    explosionFrames.push(loadImage(`assets/balloonpop2/frame_${frameNumber}.png`));
+    assets.explosionFrames.push(loadImage(`assets/balloonpop2/frame_${frameNumber}.png`));
   }
 
   // Load all balloon images
   for (let color of GAME_CONFIG.balloonColors) {
-    balloonImages.push(loadImage(`assets/${color}.png`));
+    assets.balloonImages.push(loadImage(`assets/${color}.png`));
   }
 }
 
 // Music control functions
 function startBackgroundMusic() {
-  if (backgroundMusic && !backgroundMusic.isPlaying()) {
-    backgroundMusic.setVolume(0.03); // Set volume to 10%
-    backgroundMusic.loop(); // Loop the music continuously
+  if (assets.backgroundMusic && !assets.backgroundMusic.isPlaying()) {
+    assets.backgroundMusic.setVolume(0.03); // Set volume to 10%
+    assets.backgroundMusic.loop(); // Loop the music continuously
   }
 }
 
-
-
 function stopBackgroundMusic() {
-  if (backgroundMusic && backgroundMusic.isPlaying()) {
-    backgroundMusic.stop();
+  if (assets.backgroundMusic && assets.backgroundMusic.isPlaying()) {
+    assets.backgroundMusic.stop();
   }
 }
 
 function pauseBackgroundMusic() {
-  if (backgroundMusic && backgroundMusic.isPlaying()) {
-    backgroundMusic.pause();
+  if (assets.backgroundMusic && assets.backgroundMusic.isPlaying()) {
+    assets.backgroundMusic.pause();
   }
 }
 
 function resumeBackgroundMusic() {
-  if (backgroundMusic && backgroundMusic.isPaused()) {
-    backgroundMusic.play();
+  if (assets.backgroundMusic && assets.backgroundMusic.isPaused()) {
+    assets.backgroundMusic.play();
   }
 }
 
 // Sound effect functions
 function playPopSound() {
   // Play pop sound immediately for correct balloon hits
-  if (popSound) {
-    popSound.setVolume(1.0); // Set volume to 100%
-    popSound.play();
+  if (assets.popSound) {
+    assets.popSound.setVolume(1.0); // Set volume to 100%
+    assets.popSound.play();
   }
   // Delay correct sound by 10 frames (approximately 167ms at 60fps)
-  if (correctSound) {
+  if (assets.correctSound) {
     setTimeout(() => {
-      correctSound.setVolume(0.25);
-      correctSound.play();
+      assets.correctSound.setVolume(0.25);
+      assets.correctSound.play();
     }, 167); // 10 frames at 60fps = 167ms
   }
 }
 
 function playWrongSound() {
-  if (wrongSound) {
-    wrongSound.setVolume(0.6); // Set volume to 100%
-    wrongSound.play();
+  if (assets.wrongSound) {
+    assets.wrongSound.setVolume(0.6); // Set volume to 100%
+    assets.wrongSound.play();
   }
 }
 
 function playWrongWithPop() {
   // Play pop sound immediately for wrong button press
-  if (popSound) {
-    popSound.setVolume(1.0);
-    popSound.play();
+  if (assets.popSound) {
+    assets.popSound.setVolume(1.0);
+    assets.popSound.play();
   }
   // Delay wrong sound by 10 frames (approximately 167ms at 60fps)
-  if (wrongSound) {
+  if (assets.wrongSound) {
     setTimeout(() => {
-      wrongSound.setVolume(0.6);
-      wrongSound.play();
+      assets.wrongSound.setVolume(0.6);
+      assets.wrongSound.play();
     }, 120); // 10 frames at 60fps = 167ms
   }
 }
 
 function playUIProgressSound() {
   // Play pop sound for UI progression (button presses that advance screens)
-  if (popSound) {
-    popSound.setVolume(0.2); // Slightly quieter than gameplay for UI feedback
-    popSound.play();
+  if (assets.popSound) {
+    assets.popSound.setVolume(0.2); // Slightly quieter than gameplay for UI feedback
+    assets.popSound.play();
   }
-} 
+}
+
+// Make functions globally available
+window.preload = preload;
+window.startBackgroundMusic = startBackgroundMusic;
+window.stopBackgroundMusic = stopBackgroundMusic;
+window.pauseBackgroundMusic = pauseBackgroundMusic;
+window.resumeBackgroundMusic = resumeBackgroundMusic;
+window.playPopSound = playPopSound;
+window.playWrongSound = playWrongSound;
+window.playWrongWithPop = playWrongWithPop;
+window.playUIProgressSound = playUIProgressSound; 

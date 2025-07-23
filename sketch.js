@@ -1,10 +1,37 @@
 // Main game coordinator - imports all modules and manages p5.js lifecycle
+import { startGameSession, endGameSession, isDatabaseAvailable } from './database.js';
 
 // Serial communication variables
 let serial;
 let latestData = "waiting for data";
 
+// Database event handlers
+window.onGameStart = async function() {
+  const sessionId = await startGameSession();
+  // Only log if database is actually available
+  if (sessionId && isDatabaseAvailable()) {
+    console.log('New game session started:', sessionId);
+  }
+};
+
+window.onGameEnd = async function(finalScore) {
+  const success = await endGameSession(finalScore);
+  // Only log if database is actually available
+  if (success && isDatabaseAvailable()) {
+    console.log('Game session ended successfully with score:', finalScore);
+  }
+};
+
+// Make p5.js functions globally available
+window.setup = setup;
+window.draw = draw;
+window.keyPressed = keyPressed;
+window.windowResized = windowResized;
+window.preload = preload;
+
 function setup() {
+  console.log('Setup started, gameState:', gameState);
+  
   if (windowWidth / windowHeight > GAME_CONFIG.aspectRatio) {
     currentWidth = windowHeight * GAME_CONFIG.aspectRatio;
     currentHeight = windowHeight;
@@ -24,6 +51,13 @@ function setup() {
 
   // Initialize serial communication
   initializeSerial();
+  
+  // Log database availability status only once
+  if (isDatabaseAvailable()) {
+    console.log('Database features enabled');
+  }
+  
+  console.log('Setup completed, gameState:', gameState);
 }
 
 function windowResized() {
@@ -62,11 +96,29 @@ function draw() {
   }
 }
 
-function keyPressed() {
-  // Start background music on first user interaction (if not already playing)
-  if (backgroundMusic && !backgroundMusic.isPlaying()) {
-    startBackgroundMusic();
+// Handle AudioContext startup with user interaction
+function startAudioContext() {
+  if (getAudioContext().state !== 'running') {
+    userStartAudio().then(() => {
+      console.log('Audio context started');
+      // Start background music on first user interaction (if not already playing)
+      if (backgroundMusic && !backgroundMusic.isPlaying()) {
+        startBackgroundMusic();
+      }
+    }).catch(err => {
+      console.log('Failed to start audio context:', err);
+    });
+  } else {
+    // Start background music on first user interaction (if not already playing)
+    if (backgroundMusic && !backgroundMusic.isPlaying()) {
+      startBackgroundMusic();
+    }
   }
+}
+
+function keyPressed() {
+  // Start audio context and background music on first user interaction
+  startAudioContext();
   
   if (key === ' ' || keyCode === ENTER) {
     switch (gameState) {
@@ -146,10 +198,8 @@ function gotData() {
   
   // Handle Arduino input for all game states
   if (currentString === "0" || currentString === "1") {
-    // Start background music on first Arduino interaction (if not already playing)
-    if (backgroundMusic && !backgroundMusic.isPlaying()) {
-      startBackgroundMusic();
-    }
+    // Start audio context and background music on first Arduino interaction
+    startAudioContext();
     
     switch (gameState) {
       case GAME_STATES.START:

@@ -421,8 +421,8 @@ function drawFeedback() {
   }
 
   // Keep feedback within screen bounds
-  feedbackX = constrain(feedbackX, 80, width - 80);
-  feedbackY = constrain(feedbackY, 60, height - 60);
+  feedbackX = constrain(feedbackX, width*0.05, width - width*0.05);
+  feedbackY = constrain(feedbackY, height*0.05, height - height*0.05);
 
   // Feedback text with smooth fade using COLORS.accent
   textAlign(CENTER, CENTER);
@@ -455,4 +455,13 @@ function drawFeedback() {
 
   textStyle(NORMAL);
   pop();
-} 
+}
+
+// Make functions globally available for p5.js compatibility
+window.drawStartScreen = drawStartScreen;
+window.drawInstructionScreen = drawInstructionScreen;
+window.drawGameScreen = drawGameScreen;
+window.drawEndScreen = drawEndScreen;
+window.drawStarRating = drawStarRating;
+window.drawMissedBalloons = drawMissedBalloons;
+window.drawFeedback = drawFeedback; 

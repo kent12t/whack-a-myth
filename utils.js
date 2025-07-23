@@ -44,4 +44,9 @@ function drawButton(x, y, w, h, label, bgColor, textColor) {
   textStyle(BOLD);
   text(label, x, y);
   textStyle(NORMAL);
-} 
+}
+
+// Make functions globally available for p5.js compatibility
+window.drawBalloon = drawBalloon;
+window.getAnimatedBalloon = getAnimatedBalloon;
+window.drawButton = drawButton; 

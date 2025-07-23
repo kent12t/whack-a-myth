@@ -1,0 +1,29 @@
+{
+  "name": "whack-a-myth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "assetManager.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kent12t/whack-a-myth.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kent12t/whack-a-myth/issues"
+  },
+  "homepage": "https://github.com/kent12t/whack-a-myth#readme",
+  "devDependencies": {
+    "vite": "^7.0.5"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.52.0"
+  }
+}

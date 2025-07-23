@@ -72,4 +72,15 @@ const TIMING = {
   FEEDBACK_DURATION: 90,
   ESCAPE_FEEDBACK_DURATION: 120,
   END_SCREEN_DURATION: 1800  // 30 seconds at 60fps
-}; 
+};
+
+// Make constants globally available for p5.js compatibility and module access
+window.GAME_CONFIG = GAME_CONFIG;
+window.COLORS = COLORS;
+window.MYTH_COLORS = MYTH_COLORS;
+window.MYTH_LIST = MYTH_LIST;
+window.SCORE_VALUES = SCORE_VALUES;
+window.SCORING_CONFIG = SCORING_CONFIG;
+window.SCORE_THRESHOLDS = SCORE_THRESHOLDS;
+window.GAME_STATES = GAME_STATES;
+window.TIMING = TIMING; 
