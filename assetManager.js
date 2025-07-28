@@ -165,7 +165,7 @@ function preload() {
 // Music control functions
 function startBackgroundMusic() {
   if (assets.backgroundMusic && !assets.backgroundMusic.isPlaying()) {
-    assets.backgroundMusic.setVolume(0.03); // Set volume to 10%
+    assets.backgroundMusic.setVolume(0.06); // Set volume to 10%
     assets.backgroundMusic.loop(); // Loop the music continuously
   }
 }

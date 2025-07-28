@@ -23,12 +23,12 @@ void loop() {
   if (b1) {
     Serial.println("0");
     digitalWrite(ledPin1, LOW);
-    delay(200); // debounce & prevent spam
+    delay(400); // debounce & prevent spam
   }
   if (b2) {
     Serial.println("1");
     digitalWrite(ledPin2, LOW);
-    delay(200);
+    delay(400);
   }
 }
 

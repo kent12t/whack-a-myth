@@ -15,7 +15,7 @@ class Myth {
     this.size = size;
     this.truth = truth;
     this.text = text;
-    this.normalSpeed = random(2 * (height / 1080), 3 * (height / 1080)); // Normal speed for upper screen
+    this.normalSpeed = random(2.5 * (height / 1080), 3 * (height / 1080)); // Normal speed for upper screen
     this.fastSpeed = 4 * (height / 1080); // Fast speed for lower 10% of screen
     this.speed = this.fastSpeed; // Start with fast speed since balloons spawn from bottom
     
