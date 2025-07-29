@@ -52,14 +52,17 @@ function setup() {
     textFont(gameFont);
   }
 
-  // Initialize serial communication
+    // Initialize serial communication
   initializeSerial();
-
+  
+  // Initialize language selection system
+  initializeLanguageSystem();
+  
   // Log database availability status only once
   if (isDatabaseAvailable()) {
     console.log('Database features enabled');
   }
-
+  
   console.log('Setup completed, gameState:', gameState);
 }
 
@@ -137,28 +140,42 @@ function keyPressed() {
     return; // Don't process other game logic
   }
 
-  if (key === ' ' || keyCode === ENTER) {
-    switch (gameState) {
-      case GAME_STATES.START:
+  // Handle different inputs based on game state
+  switch (gameState) {
+    case GAME_STATES.START:
+      if (key === ' ') {
+        // Spacebar cycles through languages
+        cycleLanguage();
+        playUIProgressSound();
+      } else if (keyCode === ENTER) {
+        // Enter starts the game with selected language
         gameState = GAME_STATES.INSTRUCTION;
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
-      case GAME_STATES.INSTRUCTION:
+        playUIProgressSound();
+        console.log('Game starting with language:', getSelectedLanguage().name);
+      }
+      break;
+      
+    case GAME_STATES.INSTRUCTION:
+      if (key === ' ' || keyCode === ENTER) {
         startGame();
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
-      case GAME_STATES.PLAYING:
-        if (key === ' ') {
-          handleBalloonHit(true); // Space pressed
-        } else if (keyCode === ENTER) {
-          handleBalloonHit(false); // Enter pressed
-        }
-        break;
-      case GAME_STATES.END:
+        playUIProgressSound();
+      }
+      break;
+      
+    case GAME_STATES.PLAYING:
+      if (key === ' ') {
+        handleBalloonHit(true); // Space pressed
+      } else if (keyCode === ENTER) {
+        handleBalloonHit(false); // Enter pressed
+      }
+      break;
+      
+    case GAME_STATES.END:
+      if (key === ' ' || keyCode === ENTER) {
         gameState = GAME_STATES.START;
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
-    }
+        playUIProgressSound();
+      }
+      break;
   }
 }
 
@@ -211,18 +228,14 @@ function connectArduino() {
   }
 }
 
-// Mouse handler - no automatic Arduino connection prompts
-function mousePressed() {
-  // Arduino connection shortcut - press 'C' to connect (for debugging)
 
+function mousePressed() {
   if (!port.opened()) {
-    console.log("⌨️ 'C' pressed - Opening Arduino connection...");
+    console.log("Mouse pressed - Opening Arduino connection...");
     connectArduino();
   } else {
     console.log("✅ Arduino already connected!");
   }
-  return; // Don't process other game logic
-
 }
 
 // Enhanced serial data checking with connection status
@@ -242,30 +255,43 @@ function checkSerialData() {
           console.log("Received:", currentString);
           latestData = currentString;
 
-          // Handle Arduino input for all game states
+                    // Handle Arduino input for all game states
           if (currentString === "0" || currentString === "1") {
             // Start audio context and background music on first Arduino interaction
             startAudioContext();
-
+            
             switch (gameState) {
               case GAME_STATES.START:
-                gameState = GAME_STATES.INSTRUCTION;
-                playUIProgressSound(); // Play pop sound for UI progression
-                break;
-              case GAME_STATES.INSTRUCTION:
-                startGame();
-                playUIProgressSound(); // Play pop sound for UI progression
-                break;
-              case GAME_STATES.PLAYING:
                 if (currentString === "0") {
-                  handleBalloonHit(true); // Button 1 (wrong) should act like spacebar for MYTHS
+                  // Button 0 cycles through languages (like spacebar)
+                  cycleLanguage();
+                  playUIProgressSound();
                 } else if (currentString === "1") {
-                  handleBalloonHit(false); // Button 2 (correct) should act like enter for TRUTHS
+                  // Button 1 starts the game (like enter)
+                  gameState = GAME_STATES.INSTRUCTION;
+                  playUIProgressSound();
+                  console.log('Game starting with language:', getSelectedLanguage().name);
                 }
                 break;
+                
+              case GAME_STATES.INSTRUCTION:
+                // Either button proceeds to game
+                startGame();
+                playUIProgressSound();
+                break;
+                
+              case GAME_STATES.PLAYING:
+                if (currentString === "0") {
+                  handleBalloonHit(true); // Button 0 for MYTHS
+                } else if (currentString === "1") {
+                  handleBalloonHit(false); // Button 1 for TRUTHS
+                }
+                break;
+                
               case GAME_STATES.END:
+                // Either button returns to start
                 gameState = GAME_STATES.START;
-                playUIProgressSound(); // Play pop sound for UI progression
+                playUIProgressSound();
                 break;
             }
           }

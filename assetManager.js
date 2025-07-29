@@ -18,7 +18,9 @@ const assets = {
   backgroundMusic: null,
   popSound: null,
   wrongSound: null,
-  correctSound: null
+  correctSound: null,
+  buttonBlue: null,
+  buttonGreen: null
 };
 
 // Make assets globally accessible with synchronization
@@ -117,6 +119,16 @@ Object.defineProperty(window, 'correctSound', {
   set: (value) => assets.correctSound = value
 });
 
+Object.defineProperty(window, 'buttonBlue', {
+  get: () => assets.buttonBlue,
+  set: (value) => assets.buttonBlue = value
+});
+
+Object.defineProperty(window, 'buttonGreen', {
+  get: () => assets.buttonGreen,
+  set: (value) => assets.buttonGreen = value
+});
+
 // Custom p5.js loading content
 window.addEventListener('DOMContentLoaded', function () {
   // Override p5.js loading content
@@ -141,6 +153,10 @@ function preload() {
   assets.starShadow = loadImage('assets/star-shadow.png');
   assets.instruction = loadImage('assets/instruction.png');
   assets.instructionBg = loadImage('assets/instruction-bg.png');
+  
+  // Load language selection buttons
+  assets.buttonBlue = loadImage('assets/button-blue.png');
+  assets.buttonGreen = loadImage('assets/button-green.png');
   
   // Load background music
   assets.backgroundMusic = loadSound('assets/slimetime_01.aac');

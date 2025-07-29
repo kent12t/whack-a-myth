@@ -4,28 +4,79 @@ function drawStartScreen() {
   push();
   imageMode(CENTER);
 
-  // Start button
-  let startBtnX = width / 2;
-  let startBtnY = height * 0.8;
-  let startBtnWidth = width * 0.25;
-  let startBtnHeight = startBtnWidth * startBtn.height / startBtn.width;
-  image(startBtn, startBtnX, startBtnY, startBtnWidth, startBtnHeight);
-
-  // Title
+  // Title logo
   let logoX = width / 2;
-  let logoY = height * 0.4 + sin(frameCount * 0.05) * 10;
-  let logoWidth = width * 0.7;
+  let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
+  let logoWidth = width * 0.6;
   let logoHeight = logoWidth * logo.height / logo.width;
   image(logo, logoX, logoY, logoWidth, logoHeight);
 
-  textSize(width * 0.02);
+  // Subtitle
   textAlign(CENTER, CENTER);
+  textSize(width * 0.016);
+  textStyle(NORMAL);
+  fill(COLORS.white);
+  text("Ready to bust some myths and uncover the truth?", width / 2, height * 0.66);
+
+  // Language selection SVGs
+  drawLanguageSelection();
+
+  // Instructions
+  textAlign(CENTER, CENTER);
+  textSize(width * 0.016);
   textStyle(BOLD);
   fill(COLORS.white);
-  text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
+  text("HAMMER MYTH TO SELECT LANGUAGE AND HAMMER TRUTH TO START!", width / 2, height * 0.88);
+  text("HAMMER MYTH TO SELECT LANGUAGE AND HAMMER TRUTH TO START!", width / 2, height * 0.93);
 
   pop();
 }
+
+// Draw the 4 language selection options
+function drawLanguageSelection() {
+  let buttonWidth = width * 0.15;
+  let spacing = width * 0.16;
+  let totalWidth = (LANGUAGES.length - 1) * spacing;
+  let startX = width / 2 - totalWidth / 2;
+  let buttonY = height * 0.779;
+  
+  for (let i = 0; i < LANGUAGES.length; i++) {
+    let x = startX + i * spacing;
+    
+    // Draw language button
+    drawLanguageButton(i, x, buttonY, buttonWidth);
+    
+    // Draw language label
+    textAlign(CENTER, CENTER);
+    textSize(width * 0.014);
+    textStyle(BOLD);
+    
+    // Highlight selected language text
+    let selectedIndex = LANGUAGES.findIndex(lang => lang.code === getSelectedLanguage().code);
+    if (i === selectedIndex) {
+      fill(LANGUAGE_COLORS.SELECTED);
+    } else {
+      fill(COLORS.white);
+    }
+    
+    // Calculate button height for text positioning
+    let buttonHeight = buttonWidth * (buttonBlue ? buttonBlue.height / buttonBlue.width : 0.45);
+    
+    // Handle multi-line labels
+    let lines = LANGUAGES[i].label.split('\n');
+    let lineHeight = 24 * 1080 / height;
+    let totalTextHeight = (lines.length - 1) * lineHeight;
+    let centerY = buttonY - height * 0.012;
+    let startY = centerY - totalTextHeight / 2;
+    
+    for (let j = 0; j < lines.length; j++) {
+      fill(COLORS.white);
+      text(lines[j], x+width*0.006, startY + (j * lineHeight));
+    }
+  }
+}
+
+
 
 function drawInstructionScreen() {
   push();
@@ -369,7 +420,7 @@ function drawMissedBalloons() {
     fill('#2e3192');
     
     if (balloon.truth) {
-      text("THIS IS\nTHE TRUTH!", 0, 0);
+      text("THIS IS\nA TRUTH!", 0, 0);
     } else {
       text("THIS IS\nA MYTH!", 0, 0);
     }
@@ -444,7 +495,7 @@ function drawFeedback() {
 
     textSize(width * 0.018);
     textStyle(NORMAL);
-    let truthType = feedbackData.wasTruth ? "Truth" : "Myth";
+    let truthType = feedbackData.wasTruth ? "truth" : "myth";
 
     if (feedbackData.isEscapePenalty) {
       text(`You let a ${truthType} fly away`, feedbackX, feedbackY + width * 0.011);

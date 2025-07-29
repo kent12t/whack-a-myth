@@ -1,5 +1,69 @@
 // Utility functions
 
+// Language selection using button images
+
+// Language selection system
+const LANGUAGES = [
+  { name: 'English', code: 'en', label: 'English' },
+  { name: 'Bahasa Melayu', code: 'ms', label: 'Bahasa\nMelayu' },
+  { name: 'Chinese', code: 'zh', label: '中文' },
+  { name: 'Tamil', code: 'ta', label: 'தமிழ்' }
+];
+
+// SVG colors for language selection
+const LANGUAGE_COLORS = {
+  DEFAULT: '#4650a2',
+  SELECTED: '#14a260'
+};
+
+// Current language selection state
+let selectedLanguageIndex = 0;
+
+/**
+ * Draw language button at specified position
+ */
+function drawLanguageButton(index, x, y, w, h = null) {
+  if (!buttonBlue || !buttonGreen) return;
+  
+  push();
+  imageMode(CENTER);
+  
+  if (h === null && buttonBlue.width > 0) {
+    // Maintain aspect ratio of button image
+    h = w * (buttonBlue.height / buttonBlue.width);
+  }
+  
+  // Choose button image based on selection
+  const isSelected = index === selectedLanguageIndex;
+  const buttonImage = isSelected ? buttonGreen : buttonBlue;
+  
+  image(buttonImage, x, y, w, h);
+  pop();
+}
+
+/**
+ * Cycle to next language
+ */
+function cycleLanguage() {
+  selectedLanguageIndex = (selectedLanguageIndex + 1) % LANGUAGES.length;
+  console.log('Language selected:', LANGUAGES[selectedLanguageIndex].name);
+}
+
+/**
+ * Get current selected language
+ */
+function getSelectedLanguage() {
+  return LANGUAGES[selectedLanguageIndex];
+}
+
+/**
+ * Initialize language selection system
+ */
+function initializeLanguageSystem() {
+  selectedLanguageIndex = 0;
+  console.log('Language system initialized with:', LANGUAGES[selectedLanguageIndex].name);
+}
+
 function drawBalloon(x, y, size, color, rotation = 0) {
   push();
   translate(x, y);
@@ -49,4 +113,12 @@ function drawButton(x, y, w, h, label, bgColor, textColor) {
 // Make functions globally available for p5.js compatibility
 window.drawBalloon = drawBalloon;
 window.getAnimatedBalloon = getAnimatedBalloon;
-window.drawButton = drawButton; 
+window.drawButton = drawButton;
+
+// Language selection functions
+window.LANGUAGES = LANGUAGES;
+window.LANGUAGE_COLORS = LANGUAGE_COLORS;
+window.drawLanguageButton = drawLanguageButton;
+window.cycleLanguage = cycleLanguage;
+window.getSelectedLanguage = getSelectedLanguage;
+window.initializeLanguageSystem = initializeLanguageSystem; 
