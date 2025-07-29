@@ -8,7 +8,7 @@ let connectionAttempted = false;
 let lastConnectionCheck = 0;
 
 // Database event handlers
-window.onGameStart = async function() {
+window.onGameStart = async function () {
   const sessionId = await startGameSession();
   // Only log if database is actually available
   if (sessionId && isDatabaseAvailable()) {
@@ -16,7 +16,7 @@ window.onGameStart = async function() {
   }
 };
 
-window.onGameEnd = async function(finalScore) {
+window.onGameEnd = async function (finalScore) {
   const success = await endGameSession(finalScore);
   // Only log if database is actually available
   if (success && isDatabaseAvailable()) {
@@ -34,7 +34,7 @@ window.preload = preload;
 
 function setup() {
   console.log('Setup started, gameState:', gameState);
-  
+
   if (windowWidth / windowHeight > GAME_CONFIG.aspectRatio) {
     currentWidth = windowHeight * GAME_CONFIG.aspectRatio;
     currentHeight = windowHeight;
@@ -54,12 +54,12 @@ function setup() {
 
   // Initialize serial communication
   initializeSerial();
-  
+
   // Log database availability status only once
   if (isDatabaseAvailable()) {
     console.log('Database features enabled');
   }
-  
+
   console.log('Setup completed, gameState:', gameState);
 }
 
@@ -97,7 +97,7 @@ function draw() {
       drawEndScreen();
       break;
   }
-  
+
   // Check for serial data every frame
   checkSerialData();
 }
@@ -125,7 +125,7 @@ function startAudioContext() {
 function keyPressed() {
   // Start audio context and background music on first user interaction
   startAudioContext();
-  
+
   // Arduino connection shortcut - press 'C' to connect (for debugging)
   if (key === 'c' || key === 'C') {
     if (!port.opened()) {
@@ -136,7 +136,7 @@ function keyPressed() {
     }
     return; // Don't process other game logic
   }
-  
+
   if (key === ' ' || keyCode === ENTER) {
     switch (gameState) {
       case GAME_STATES.START:
@@ -166,7 +166,7 @@ function keyPressed() {
 function initializeSerial() {
   // Create a new serial port instance
   port = createSerial();
-  
+
   // Try to automatically connect to previously used Arduino
   let usedPorts = usedSerialPorts();
   if (usedPorts.length > 0) {
@@ -174,7 +174,7 @@ function initializeSerial() {
     port.open(usedPorts[0], 9600);
     connectionAttempted = true;
   }
-  
+
   // Set up connection monitoring
   setInterval(monitorConnection, 5000); // Check every 5 seconds
 }
@@ -213,10 +213,16 @@ function connectArduino() {
 
 // Mouse handler - no automatic Arduino connection prompts
 function mousePressed() {
-  // Call the original mousePressed if it exists
-  if (typeof originalMousePressed === 'function') {
-    originalMousePressed();
+  // Arduino connection shortcut - press 'C' to connect (for debugging)
+
+  if (!port.opened()) {
+    console.log("⌨️ 'C' pressed - Opening Arduino connection...");
+    connectArduino();
+  } else {
+    console.log("✅ Arduino already connected!");
   }
+  return; // Don't process other game logic
+
 }
 
 // Enhanced serial data checking with connection status
@@ -224,23 +230,23 @@ function checkSerialData() {
   if (port.opened()) {
     // Reset connection check timer when we have an active connection
     lastConnectionCheck = millis();
-    
+
     if (port.available() > 0) {
       let currentString = port.readUntil('\n');
-      
+
       if (currentString.length > 0) {
         // Remove whitespace and newline characters
         currentString = currentString.trim();
-        
+
         if (currentString) {
           console.log("Received:", currentString);
           latestData = currentString;
-          
+
           // Handle Arduino input for all game states
           if (currentString === "0" || currentString === "1") {
             // Start audio context and background music on first Arduino interaction
             startAudioContext();
-            
+
             switch (gameState) {
               case GAME_STATES.START:
                 gameState = GAME_STATES.INSTRUCTION;
@@ -266,7 +272,7 @@ function checkSerialData() {
         }
       }
     }
-    
+
   } else {
     // No UI prompts - connection handled silently
   }
