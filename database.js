@@ -21,7 +21,7 @@ if (supabaseUrl && supabaseKey) {
   supabase = createClient(supabaseUrl, supabaseKey);
   console.log('Database connection available');
 } else {
-  console.log('Running in offline mode - database features disabled');
+  console.log('Running in offline mode - using localStorage for data storage');
   console.log('Missing env vars:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey });
   hasLoggedOfflineWarning = true;
 }
@@ -29,41 +29,104 @@ if (supabaseUrl && supabaseKey) {
 // Game session tracking
 let currentGameSession = null;
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+  GAME_SESSIONS: 'whack_a_myth_sessions',
+  CURRENT_SESSION: 'whack_a_myth_current_session',
+  SESSION_COUNTER: 'whack_a_myth_session_counter'
+};
+
+// LocalStorage helper functions
+function getLocalData(key, defaultValue = null) {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : defaultValue;
+  } catch (error) {
+    console.error('Error reading from localStorage:', error);
+    return defaultValue;
+  }
+}
+
+function setLocalData(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.error('Error writing to localStorage:', error);
+    return false;
+  }
+}
+
+function getNextSessionId() {
+  const counter = getLocalData(STORAGE_KEYS.SESSION_COUNTER, 0);
+  const newId = counter + 1;
+  setLocalData(STORAGE_KEYS.SESSION_COUNTER, newId);
+  return newId;
+}
+
+function saveSessionToLocal(session) {
+  const sessions = getLocalData(STORAGE_KEYS.GAME_SESSIONS, []);
+  const existingIndex = sessions.findIndex(s => s.id === session.id);
+  
+  if (existingIndex >= 0) {
+    sessions[existingIndex] = session;
+  } else {
+    sessions.push(session);
+  }
+  
+  setLocalData(STORAGE_KEYS.GAME_SESSIONS, sessions);
+  setLocalData(STORAGE_KEYS.CURRENT_SESSION, session);
+}
+
 /**
- * Start a new game session and log start time to database
- * @returns {number|null} Database record ID or null if database is not available
+ * Start a new game session and log start time to database or localStorage
+ * @returns {number|null} Database record ID or null if both database and localStorage fail
  */
 export async function startGameSession() {
-  if (!supabase) {
-    return null; // Silently return null when offline
-  }
+  const startTime = new Date().toISOString();
+  
+  // Try database first if available
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('data')
+        .insert([{ start_time: startTime }])
+        .select();
 
-  try {
-    const startTime = new Date().toISOString();
-    
-    const { data, error } = await supabase
-      .from('data')
-      .insert([
-        {
-          start_time: startTime
-        }
-      ])
-      .select();
-
-    if (error) {
-      console.error('Error starting game session:', error);
-      return null;
+      if (!error && data) {
+        currentGameSession = {
+          id: data[0].id,
+          startTime: startTime,
+          source: 'database'
+        };
+        console.log('Game session started (database):', currentGameSession);
+        return data[0].id;
+      }
+    } catch (error) {
+      console.error('Database error, falling back to localStorage:', error);
     }
-
-    currentGameSession = {
-      id: data[0].id,
-      startTime: startTime
+  }
+  
+  // Fallback to localStorage
+  try {
+    const sessionId = getNextSessionId();
+    const session = {
+      id: sessionId,
+      start_time: startTime,
+      source: 'localStorage'
     };
-
-    console.log('Game session started:', currentGameSession);
-    return data[0].id;
+    
+    currentGameSession = {
+      id: sessionId,
+      startTime: startTime,
+      source: 'localStorage'
+    };
+    
+    saveSessionToLocal(session);
+    console.log('Game session started (localStorage):', currentGameSession);
+    return sessionId;
   } catch (error) {
-    console.error('Error starting game session:', error);
+    console.error('Error starting game session (localStorage):', error);
     return null;
   }
 }
@@ -74,36 +137,62 @@ export async function startGameSession() {
  * @returns {boolean} Success status
  */
 export async function endGameSession(finalScore) {
-  if (!supabase || !currentGameSession) {
-    return false; // Silently return false when offline or no session
+  if (!currentGameSession) {
+    return false;
   }
 
+  const endTime = new Date().toISOString();
+  
+  // Try database first if this session came from database
+  if (supabase && currentGameSession.source === 'database') {
+    try {
+      const { error } = await supabase
+        .from('data')
+        .update({
+          end_time: endTime,
+          result: finalScore
+        })
+        .eq('id', currentGameSession.id);
+
+      if (!error) {
+        console.log('Game session ended (database):', {
+          ...currentGameSession,
+          endTime: endTime,
+          finalScore: finalScore
+        });
+        currentGameSession = null;
+        return true;
+      }
+    } catch (error) {
+      console.error('Database error, falling back to localStorage:', error);
+    }
+  }
+  
+  // Use localStorage (either as fallback or primary)
   try {
-    const endTime = new Date().toISOString();
+    const sessions = getLocalData(STORAGE_KEYS.GAME_SESSIONS, []);
+    const sessionIndex = sessions.findIndex(s => s.id === currentGameSession.id);
     
-    const { error } = await supabase
-      .from('data')
-      .update({
+    if (sessionIndex >= 0) {
+      sessions[sessionIndex] = {
+        ...sessions[sessionIndex],
         end_time: endTime,
         result: finalScore
-      })
-      .eq('id', currentGameSession.id);
-
-    if (error) {
-      console.error('Error ending game session:', error);
-      return false;
+      };
+      setLocalData(STORAGE_KEYS.GAME_SESSIONS, sessions);
     }
-
-    console.log('Game session ended:', {
+    
+    console.log('Game session ended (localStorage):', {
       ...currentGameSession,
       endTime: endTime,
       finalScore: finalScore
     });
-
+    
     currentGameSession = null;
+    setLocalData(STORAGE_KEYS.CURRENT_SESSION, null);
     return true;
   } catch (error) {
-    console.error('Error ending game session:', error);
+    console.error('Error ending game session (localStorage):', error);
     return false;
   }
 }
@@ -122,4 +211,63 @@ export function getCurrentSession() {
  */
 export function isDatabaseAvailable() {
   return supabase !== null;
+}
+
+/**
+ * Get all stored game sessions from localStorage
+ * @returns {Array} Array of game sessions
+ */
+export function getStoredSessions() {
+  return getLocalData(STORAGE_KEYS.GAME_SESSIONS, []);
+}
+
+/**
+ * Get basic statistics from stored sessions
+ * @returns {object} Statistics object
+ */
+export function getGameStats() {
+  const sessions = getStoredSessions();
+  const completedSessions = sessions.filter(s => s.end_time && s.result !== undefined);
+  
+  if (completedSessions.length === 0) {
+    return { totalGames: 0, averageScore: 0, highScore: 0, totalPlayTime: 0 };
+  }
+  
+  const scores = completedSessions.map(s => s.result);
+  const totalScore = scores.reduce((sum, score) => sum + score, 0);
+  const highScore = Math.max(...scores);
+  
+  // Calculate total play time
+  const totalPlayTime = completedSessions.reduce((total, session) => {
+    if (session.start_time && session.end_time) {
+      const start = new Date(session.start_time);
+      const end = new Date(session.end_time);
+      return total + (end - start);
+    }
+    return total;
+  }, 0);
+  
+  return {
+    totalGames: completedSessions.length,
+    averageScore: Math.round(totalScore / completedSessions.length),
+    highScore: highScore,
+    totalPlayTime: Math.round(totalPlayTime / 1000) // Convert to seconds
+  };
+}
+
+/**
+ * Clear all stored game data (useful for testing or reset)
+ * @returns {boolean} Success status
+ */
+export function clearStoredData() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.GAME_SESSIONS);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
+    localStorage.removeItem(STORAGE_KEYS.SESSION_COUNTER);
+    console.log('All stored game data cleared');
+    return true;
+  } catch (error) {
+    console.error('Error clearing stored data:', error);
+    return false;
+  }
 } 
