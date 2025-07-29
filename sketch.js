@@ -2,8 +2,10 @@
 import { startGameSession, endGameSession, isDatabaseAvailable } from './database.js';
 
 // Serial communication variables
-let serial;
-let latestData = "waiting for data";
+let port;
+let latestData = "";
+let connectionAttempted = false;
+let lastConnectionCheck = 0;
 
 // Database event handlers
 window.onGameStart = async function() {
@@ -26,6 +28,7 @@ window.onGameEnd = async function(finalScore) {
 window.setup = setup;
 window.draw = draw;
 window.keyPressed = keyPressed;
+window.mousePressed = mousePressed;
 window.windowResized = windowResized;
 window.preload = preload;
 
@@ -94,6 +97,9 @@ function draw() {
       drawEndScreen();
       break;
   }
+  
+  // Check for serial data every frame
+  checkSerialData();
 }
 
 // Handle AudioContext startup with user interaction
@@ -119,6 +125,17 @@ function startAudioContext() {
 function keyPressed() {
   // Start audio context and background music on first user interaction
   startAudioContext();
+  
+  // Arduino connection shortcut - press 'C' to connect (for debugging)
+  if (key === 'c' || key === 'C') {
+    if (!port.opened()) {
+      console.log("⌨️ 'C' pressed - Opening Arduino connection...");
+      connectArduino();
+    } else {
+      console.log("✅ Arduino already connected!");
+    }
+    return; // Don't process other game logic
+  }
   
   if (key === ' ' || keyCode === ENTER) {
     switch (gameState) {
@@ -147,81 +164,111 @@ function keyPressed() {
 
 // Serial communication functions
 function initializeSerial() {
-  // Instantiate our SerialPort object
-  serial = new p5.SerialPort();
-
-  // Get a list the ports available
-  serial.list();
-
-  // Open connection to Arduino on COM5
-  serial.open("COM5");
-
-  // Set up event callbacks
-  serial.on('connected', serverConnected);
-  serial.on('list', gotList);
-  serial.on('data', gotData);
-  serial.on('error', gotError);
-  serial.on('open', gotOpen);
-  serial.on('close', gotClose);
+  // Create a new serial port instance
+  port = createSerial();
+  
+  // Try to automatically connect to previously used Arduino
+  let usedPorts = usedSerialPorts();
+  if (usedPorts.length > 0) {
+    console.log("Connecting to previously used port:", usedPorts[0]);
+    port.open(usedPorts[0], 9600);
+    connectionAttempted = true;
+  }
+  
+  // Set up connection monitoring
+  setInterval(monitorConnection, 5000); // Check every 5 seconds
 }
 
-function serverConnected() {
-  print("Connected to Server");
-}
-
-function gotList(thelist) {
-  print("List of Serial Ports:");
-  for (let i = 0; i < thelist.length; i++) {
-    print(i + " " + thelist[i]);
+function monitorConnection() {
+  if (!port.opened() && connectionAttempted) {
+    console.log("Connection lost. Attempting to reconnect...");
+    attemptReconnection();
   }
 }
 
-function gotOpen() {
-  print("Serial Port is Open");
+function attemptReconnection() {
+  let usedPorts = usedSerialPorts();
+  if (usedPorts.length > 0) {
+    console.log("Trying to reconnect to:", usedPorts[0]);
+    port.open(usedPorts[0], 9600);
+  }
 }
 
-function gotClose() {
-  print("Serial Port is Closed");
-  latestData = "Serial Port is Closed";
-}
-
-function gotError(theerror) {
-  print(theerror);
-}
-
-function gotData() {
-  let currentString = serial.readLine();
-  trim(currentString);
-  if (!currentString) return;
-  console.log(currentString);
-  latestData = currentString;
-  
-  // Handle Arduino input for all game states
-  if (currentString === "0" || currentString === "1") {
-    // Start audio context and background music on first Arduino interaction
-    startAudioContext();
-    
-    switch (gameState) {
-      case GAME_STATES.START:
-        gameState = GAME_STATES.INSTRUCTION;
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
-      case GAME_STATES.INSTRUCTION:
-        startGame();
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
-      case GAME_STATES.PLAYING:
-        if (currentString === "0") {
-          handleBalloonHit(true); // Button 1 (wrong) should act like spacebar for MYTHS
-        } else if (currentString === "1") {
-          handleBalloonHit(false); // Button 2 (correct) should act like enter for TRUTHS
-        }
-        break;
-      case GAME_STATES.END:
-        gameState = GAME_STATES.START;
-        playUIProgressSound(); // Play pop sound for UI progression
-        break;
+function connectArduino() {
+  console.log("🔌 Attempting to connect to Arduino...");
+  try {
+    port.open(9600);
+    connectionAttempted = true;
+    console.log("✅ Port.open() called successfully");
+  } catch (error) {
+    console.error("❌ Error opening port:", error);
+    try {
+      port.open('Arduino', 9600);
+      console.log("✅ Arduino-filtered port.open() called");
+    } catch (error2) {
+      console.error("❌ Error with Arduino filter:", error2);
     }
+  }
+}
+
+// Mouse handler - no automatic Arduino connection prompts
+function mousePressed() {
+  // Call the original mousePressed if it exists
+  if (typeof originalMousePressed === 'function') {
+    originalMousePressed();
+  }
+}
+
+// Enhanced serial data checking with connection status
+function checkSerialData() {
+  if (port.opened()) {
+    // Reset connection check timer when we have an active connection
+    lastConnectionCheck = millis();
+    
+    if (port.available() > 0) {
+      let currentString = port.readUntil('\n');
+      
+      if (currentString.length > 0) {
+        // Remove whitespace and newline characters
+        currentString = currentString.trim();
+        
+        if (currentString) {
+          console.log("Received:", currentString);
+          latestData = currentString;
+          
+          // Handle Arduino input for all game states
+          if (currentString === "0" || currentString === "1") {
+            // Start audio context and background music on first Arduino interaction
+            startAudioContext();
+            
+            switch (gameState) {
+              case GAME_STATES.START:
+                gameState = GAME_STATES.INSTRUCTION;
+                playUIProgressSound(); // Play pop sound for UI progression
+                break;
+              case GAME_STATES.INSTRUCTION:
+                startGame();
+                playUIProgressSound(); // Play pop sound for UI progression
+                break;
+              case GAME_STATES.PLAYING:
+                if (currentString === "0") {
+                  handleBalloonHit(true); // Button 1 (wrong) should act like spacebar for MYTHS
+                } else if (currentString === "1") {
+                  handleBalloonHit(false); // Button 2 (correct) should act like enter for TRUTHS
+                }
+                break;
+              case GAME_STATES.END:
+                gameState = GAME_STATES.START;
+                playUIProgressSound(); // Play pop sound for UI progression
+                break;
+            }
+          }
+        }
+      }
+    }
+    
+  } else {
+    // No UI prompts - connection handled silently
   }
 }
 
