@@ -2,20 +2,6 @@
 
 // Language selection using button images
 
-// Language selection system
-const LANGUAGES = [
-  { name: 'English', code: 'en', label: 'English' },
-  { name: 'Bahasa Melayu', code: 'ms', label: 'Bahasa\nMelayu' },
-  { name: 'Chinese', code: 'zh', label: '中文' },
-  { name: 'Tamil', code: 'ta', label: 'தமிழ்' }
-];
-
-// SVG colors for language selection
-const LANGUAGE_COLORS = {
-  DEFAULT: '#4650a2',
-  SELECTED: '#14a260'
-};
-
 // Current language selection state
 let selectedLanguageIndex = 0;
 
@@ -116,8 +102,6 @@ window.getAnimatedBalloon = getAnimatedBalloon;
 window.drawButton = drawButton;
 
 // Language selection functions
-window.LANGUAGES = LANGUAGES;
-window.LANGUAGE_COLORS = LANGUAGE_COLORS;
 window.drawLanguageButton = drawLanguageButton;
 window.cycleLanguage = cycleLanguage;
 window.getSelectedLanguage = getSelectedLanguage;

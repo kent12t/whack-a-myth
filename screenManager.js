@@ -16,7 +16,7 @@ function drawStartScreen() {
   textSize(width * 0.016);
   textStyle(NORMAL);
   fill(COLORS.white);
-  text("Ready to bust some myths and uncover the truth?", width / 2, height * 0.66);
+  text(getText('startSubtitle'), width / 2, height * 0.66);
 
   // Language selection SVGs
   drawLanguageSelection();
@@ -26,8 +26,13 @@ function drawStartScreen() {
   textSize(width * 0.016);
   textStyle(BOLD);
   fill(COLORS.white);
-  text("HAMMER MYTH TO SELECT LANGUAGE AND HAMMER TRUTH TO START!", width / 2, height * 0.88);
-  text("HAMMER MYTH TO SELECT LANGUAGE AND HAMMER TRUTH TO START!", width / 2, height * 0.93);
+  // Top line: Always English
+  text(UI_TEXT.en.startInstruction, width / 2, height * 0.9);
+  // Bottom line: Only show if language is not English
+  const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
+  if (currentLang !== 'en') {
+    text(getText('startInstruction'), width / 2, height * 0.94);
+  }
 
   pop();
 }
@@ -107,7 +112,7 @@ function drawInstructionScreen() {
   textStyle(BOLD);
   fill(COLORS.white);
   textAlign(CENTER, CENTER);
-  text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
+  text(getText('instructionPrompt'), width / 2, height * 0.935);
 
   pop();
 }
@@ -229,11 +234,11 @@ function drawEndScreen() {
   // Idle timer display
   fill(COLORS.white);
   textSize(width * 0.02);
-  text("HAMMER ANY BUTTON TO RESTART", width / 2, height * 0.92);
+  text(getText('endRestartPrompt'), width / 2, height * 0.92);
   textSize(width * 0.01);
   textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((TIMING.END_SCREEN_DURATION - (TIMING.END_SCREEN_DURATION - endScreenTimer)) / 60);
-  text("Auto-restarting in " + timeLeft + "s", width / 2, height * 0.965);
+  text(getText('autoRestartMessage', { timeLeft }), width / 2, height * 0.965);
 
   // Handle idle timer
   endScreenTimer--;
@@ -420,9 +425,9 @@ function drawMissedBalloons() {
     fill('#2e3192');
     
     if (balloon.truth) {
-      text("THIS IS\nA TRUTH!", 0, 0);
+      text(getText('truthLabel'), 0, 0);
     } else {
-      text("THIS IS\nA MYTH!", 0, 0);
+      text(getText('mythLabel'), 0, 0);
     }
     
     pop();
@@ -483,24 +488,24 @@ function drawFeedback() {
     // Correct feedback
     textSize(width * 0.0208);
     textStyle(BOLD);
-    text("You got it!", feedbackX, feedbackY - width * 0.011);
+    text(getText('correctFeedback'), feedbackX, feedbackY - width * 0.011);
 
     textSize(width * 0.025);
-    text(`+${SCORE_VALUES.CORRECT} points`, feedbackX, feedbackY + width * 0.011);
+    text(`+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`, feedbackX, feedbackY + width * 0.011);
   } else {
     // Wrong feedback
     textSize(width * 0.0208);
     textStyle(BOLD);
-    text("Oops!", feedbackX, feedbackY - width * 0.011);
+    text(getText('wrongFeedback'), feedbackX, feedbackY - width * 0.011);
 
     textSize(width * 0.018);
     textStyle(NORMAL);
-    let truthType = feedbackData.wasTruth ? "truth" : "myth";
+    let truthType = feedbackData.wasTruth ? getText('truthWord') : getText('mythWord');
 
     if (feedbackData.isEscapePenalty) {
-      text(`You let a ${truthType} fly away`, feedbackX, feedbackY + width * 0.011);
+      text(getText('escapeMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
     } else {
-      text(`This one's actually a ${truthType}`, feedbackX, feedbackY + width * 0.011);
+      text(getText('wrongChoiceMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
     }
   }
 
