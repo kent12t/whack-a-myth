@@ -1,4 +1,12 @@
 // Game constants and configuration
+const DEPLOYMENT_CONFIG = {
+  // Set to false to disable language switching for deployment
+  // Set to true to re-enable full language selection functionality
+  // When false: only English is used, language buttons are hidden, both 0/spacebar and 1/enter proceed from start screen
+  // When true: original behavior with language cycling and selection
+  enableLanguageSelection: false
+};
+
 const GAME_CONFIG = {
   aspectRatio: 16 / 9,
   balloonColors: ['darkblue', 'green', 'midblue', 'orange', 'red', 'violet', 'yellow']
@@ -215,7 +223,10 @@ const TIMING = {
 
 // Helper function to get text in current language
 function getText(key, variables = {}) {
-  const lang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  // In deployment mode, always use English
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
   let text = UI_TEXT[lang] ? UI_TEXT[lang][key] : UI_TEXT.en[key];
   
   // Replace template variables
@@ -228,7 +239,10 @@ function getText(key, variables = {}) {
 
 // Helper function to get localized myth list
 function getLocalizedMythList() {
-  const lang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  // In deployment mode, always use English
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
   const mythTexts = UI_TEXT[lang] ? UI_TEXT[lang].myths : UI_TEXT.en.myths;
   
   return mythTexts.map((text, index) => ({
@@ -244,6 +258,7 @@ function getMythList() {
 
 // Make constants globally available for p5.js compatibility and module access
 window.GAME_CONFIG = GAME_CONFIG;
+window.DEPLOYMENT_CONFIG = DEPLOYMENT_CONFIG;
 window.COLORS = COLORS;
 window.LANGUAGES = LANGUAGES;
 window.LANGUAGE_COLORS = LANGUAGE_COLORS;

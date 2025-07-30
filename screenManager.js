@@ -1,37 +1,65 @@
 // Screen drawing functions
 
 function drawStartScreen() {
+  // This function conditionally shows either:
+  // - Full language selection interface (when DEPLOYMENT_CONFIG.enableLanguageSelection = true)
+  // - Simple start.png image with English-only text (when DEPLOYMENT_CONFIG.enableLanguageSelection = false)
+
   push();
   imageMode(CENTER);
 
-  // Title logo
-  let logoX = width / 2;
-  let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
-  let logoWidth = width * 0.6;
-  let logoHeight = logoWidth * logo.height / logo.width;
-  image(logo, logoX, logoY, logoWidth, logoHeight);
+  if (DEPLOYMENT_CONFIG.enableLanguageSelection) {
+    // Title logo (original behavior)
+    let logoX = width / 2;
+    let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
+    let logoWidth = width * 0.6;
+    let logoHeight = logoWidth * logo.height / logo.width;
+    image(logo, logoX, logoY, logoWidth, logoHeight);
 
-  // Subtitle
-  textAlign(CENTER, CENTER);
-  textSize(width * 0.016);
-  textStyle(NORMAL);
-  fill(COLORS.white);
-  text(getText('startSubtitle'), width / 2, height * 0.66);
+    // Subtitle
+    textAlign(CENTER, CENTER);
+    textSize(width * 0.016);
+    textStyle(NORMAL);
+    fill(COLORS.white);
+    text(getText('startSubtitle'), width / 2, height * 0.66);
 
-  // Language selection SVGs
-  drawLanguageSelection();
+    // Language selection SVGs
+    drawLanguageSelection();
 
-  // Instructions
-  textAlign(CENTER, CENTER);
-  textSize(width * 0.016);
-  textStyle(BOLD);
-  fill(COLORS.white);
-  // Top line: Always English
-  text(UI_TEXT.en.startInstruction, width / 2, height * 0.9);
-  // Bottom line: Only show if language is not English
-  const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
-  if (currentLang !== 'en') {
-    text(getText('startInstruction'), width / 2, height * 0.94);
+    // Instructions
+    textAlign(CENTER, CENTER);
+    textSize(width * 0.016);
+    textStyle(BOLD);
+    fill(COLORS.white);
+    // Top line: Always English
+    text(UI_TEXT.en.startInstruction, width / 2, height * 0.9);
+    // Bottom line: Only show if language is not English
+    const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
+    if (currentLang !== 'en') {
+      text(getText('startInstruction'), width / 2, height * 0.94);
+    }
+  } else {
+
+    imageMode(CENTER);
+
+    let startX = width / 2;
+    let startY = height * 0.8;
+    let startWidth = width * 0.25; // Adjust size as needed
+    let startHeight = startWidth * (startBtn ? startBtn.height / startBtn.width : 0.6);
+    image(startBtn, startX, startY, startWidth, startHeight);
+
+    let logoX = width / 2;
+    let logoY = height * 0.4 + sin(frameCount * 0.05) * 5;
+    let logoWidth = width * 0.7;
+    let logoHeight = logoWidth * logo.height / logo.width;
+    image(logo, logoX, logoY, logoWidth, logoHeight);
+
+    // Simple English-only instructions
+    textAlign(CENTER, CENTER);
+    textSize(width * 0.02);
+    textStyle(BOLD);
+    fill(COLORS.white);
+    text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
   }
 
   pop();
@@ -44,18 +72,18 @@ function drawLanguageSelection() {
   let totalWidth = (LANGUAGES.length - 1) * spacing;
   let startX = width / 2 - totalWidth / 2;
   let buttonY = height * 0.779;
-  
+
   for (let i = 0; i < LANGUAGES.length; i++) {
     let x = startX + i * spacing;
-    
+
     // Draw language button
     drawLanguageButton(i, x, buttonY, buttonWidth);
-    
+
     // Draw language label
     textAlign(CENTER, CENTER);
     textSize(width * 0.014);
     textStyle(BOLD);
-    
+
     // Highlight selected language text
     let selectedIndex = LANGUAGES.findIndex(lang => lang.code === getSelectedLanguage().code);
     if (i === selectedIndex) {
@@ -63,20 +91,20 @@ function drawLanguageSelection() {
     } else {
       fill(COLORS.white);
     }
-    
+
     // Calculate button height for text positioning
     let buttonHeight = buttonWidth * (buttonBlue ? buttonBlue.height / buttonBlue.width : 0.45);
-    
+
     // Handle multi-line labels
     let lines = LANGUAGES[i].label.split('\n');
     let lineHeight = 24 * 1080 / height;
     let totalTextHeight = (lines.length - 1) * lineHeight;
     let centerY = buttonY - height * 0.012;
     let startY = centerY - totalTextHeight / 2;
-    
+
     for (let j = 0; j < lines.length; j++) {
       fill(COLORS.white);
-      text(lines[j], x+width*0.006, startY + (j * lineHeight));
+      text(lines[j], x + width * 0.006, startY + (j * lineHeight));
     }
   }
 }
@@ -138,7 +166,7 @@ function drawGameScreen() {
           isEscapePenalty: true // Flag to indicate this is an escape penalty
         };
         feedbackTimer = TIMING.ESCAPE_FEEDBACK_DURATION;
-        
+
         // Track this as a missed balloon
         missedBalloons.push({
           text: currentMyth.text,
@@ -146,7 +174,7 @@ function drawGameScreen() {
           color: currentMyth.color,
           missType: 'FLY_AWAY'
         });
-        
+
         // Play wrong sound for balloon that flew away
         playWrongSound();
       }
@@ -196,7 +224,7 @@ function drawEndScreen() {
 
   // Determine if we have a perfect score (no missed balloons)
   let isPerfectScore = missedBalloons.length === 0;
-  
+
   if (isPerfectScore) {
     // Perfect score - center the result section
     image(resultBg, width * 0.5, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
@@ -305,35 +333,35 @@ function drawMissedBalloons() {
   const cols = 2;
   const maxRows = 3;
   const maxBalloons = cols * maxRows;
-  
+
   // Use only the first 6 missed balloons if there are more
   const balloonsToShow = missedBalloons.slice(0, maxBalloons);
-  
+
   // Calculate balloon size and spacing
   const reportCenterX = width * 0.75;
   const reportCenterY = height / 2;
   const reportWidth = height * 0.7 * (reportBg.width / reportBg.height) * 0.9;
   const reportHeight = height * 0.7 * 0.8;
-  
+
   // Calculate rows needed
   const rows = Math.ceil(balloonsToShow.length / cols);
-  
+
   // Balloon size - make them larger and account for overlap zones
   // Balloons can overlap: 10% top, 30% left/right, 40% bottom
   let balloonSize = reportWidth * 1.5; // Start with a more reasonable base size
-  
+
   // Spacing between balloon centers (accounting for safe overlap)
   let verticalSpacing = balloonSize * 0.45;   // Slightly more vertical gap for better appearance
-  
+
   // Calculate total grid height and ensure it fits in safe zone
   let gridHeight = (rows - 1) * verticalSpacing + balloonSize;
-  
+
   // If grid is too tall, reduce spacing first, then balloon size as last resort
   if (gridHeight > reportHeight) {
     // First try reducing vertical spacing more aggressively with honeycomb packing
     verticalSpacing = balloonSize * 0.35; // More conservative overlap to maintain gap
     gridHeight = (rows - 1) * verticalSpacing + balloonSize;
-    
+
     // If still too tall, then scale balloon size but less aggressively
     if (gridHeight > reportHeight) {
       const scaleFactor = reportHeight / gridHeight * 0.98; // 95% instead of 90% for less aggressive scaling
@@ -342,97 +370,97 @@ function drawMissedBalloons() {
       gridHeight = (rows - 1) * verticalSpacing + balloonSize;
     }
   }
-  
+
   // Grid positioning - center the entire grid accounting for honeycomb offset
   const gridWidth = (cols - 1) * (balloonSize * 0.7);
-  
+
   // Calculate horizontal offset adjustment for honeycomb pattern
   let horizontalAdjustment = 0;
   if (balloonsToShow.length >= 4) {
     // For 4+ balloons, shift left to compensate for honeycomb offset pushing right
     horizontalAdjustment = -(balloonSize * 0.7) / 4; // Quarter of the offset back to left
   }
-  
+
   const startX = reportCenterX - gridWidth / 2 + horizontalAdjustment;
   const startY = reportCenterY - gridHeight / 2 + reportHeight * 0.35; // Shift down
-  
+
   push();
-  
+
   for (let i = 0; i < balloonsToShow.length; i++) {
     const balloon = balloonsToShow[i];
     const col = i % cols;
     const row = Math.floor(i / cols);
-    
+
     // Calculate position using the updated spacing with honeycomb offset
     let baseX = startX + col * (balloonSize * 0.7);
-    
+
     // Offset odd rows horizontally for tighter packing (honeycomb pattern)
     if (row % 2 === 1) {
       baseX += (balloonSize * 0.7) / 2; // Shift odd rows by half the horizontal spacing
     }
-    
+
     const baseY = startY + row * verticalSpacing;
-    
+
     // Add animated sine wave bounce with offset for each balloon
     const timeOffset = i * 30; // Different phase for each balloon
     const bounceY = sin((frameCount + timeOffset) * 0.06) * 8;
     const bounceX = cos((frameCount + timeOffset) * 0.04) * 4;
-    
+
     const x = baseX + bounceX;
     const y = baseY + bounceY;
-    
+
     // Draw balloon
     push();
     imageMode(CENTER);
-    
+
     // Get balloon image index
     const balloonImageIndex = GAME_CONFIG.balloonColors.indexOf(balloon.color);
     if (balloonImageIndex >= 0) {
       image(balloonImages[balloonImageIndex], x, y, balloonSize * 0.8, balloonSize * 0.8);
     }
-    
+
     // Draw myth/truth text on balloon
     textAlign(CENTER, CENTER);
     textSize(balloonSize * 0.035);
-    
+
     // Text shadow
     fill(0, 0, 0, 100);
     textStyle(BOLD);
     text(balloon.text, x + 1, y - balloonSize * 0.1 + 1);
-    
+
     // Main text
     fill(COLORS.white);
     text(balloon.text, x, y - balloonSize * 0.1);
-    
+
     pop();
 
     // Draw label top left of balloon
     push();
     const labelX = x - balloonSize * 0.1;
     const labelY = y - balloonSize * 0.225;
-    
+
     // Move to label position first, then rotate
     translate(labelX, labelY);
     rotate(-PI / 6); // Slightly less rotation for better readability
-    
+
     textAlign(CENTER, CENTER);
     textSize(balloonSize * 0.03);
     textStyle(BOLD);
-    
+
     // Label with stroke
     stroke(COLORS.white);
-    strokeWeight(width* 0.0015);
+    strokeWeight(width * 0.0015);
     fill('#2e3192');
-    
+
     if (balloon.truth) {
       text(getText('truthLabel'), 0, 0);
     } else {
       text(getText('mythLabel'), 0, 0);
     }
-    
+
     pop();
   }
-  
+
   pop();
 }
 
@@ -477,8 +505,8 @@ function drawFeedback() {
   }
 
   // Keep feedback within screen bounds
-  feedbackX = constrain(feedbackX, width*0.05, width - width*0.05);
-  feedbackY = constrain(feedbackY, height*0.05, height - height*0.05);
+  feedbackX = constrain(feedbackX, width * 0.05, width - width * 0.05);
+  feedbackY = constrain(feedbackY, height * 0.05, height - height * 0.05);
 
   // Feedback text with smooth fade using COLORS.accent
   textAlign(CENTER, CENTER);

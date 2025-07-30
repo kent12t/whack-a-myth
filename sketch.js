@@ -143,15 +143,25 @@ function keyPressed() {
   // Handle different inputs based on game state
   switch (gameState) {
     case GAME_STATES.START:
-      if (key === ' ') {
-        // Spacebar cycles through languages
-        cycleLanguage();
-        playUIProgressSound();
-      } else if (keyCode === ENTER) {
-        // Enter starts the game with selected language
-        gameState = GAME_STATES.INSTRUCTION;
-        playUIProgressSound();
-        console.log('Game starting with language:', getSelectedLanguage().name);
+      if (DEPLOYMENT_CONFIG.enableLanguageSelection) {
+        // Original behavior: spacebar cycles languages, enter starts
+        if (key === ' ') {
+          // Spacebar cycles through languages
+          cycleLanguage();
+          playUIProgressSound();
+        } else if (keyCode === ENTER) {
+          // Enter starts the game with selected language
+          gameState = GAME_STATES.INSTRUCTION;
+          playUIProgressSound();
+          console.log('Game starting with language:', getSelectedLanguage().name);
+        }
+      } else {
+        // Deployment behavior: both 0/spacebar and 1/enter proceed to instruction
+        if (key === ' ' || key === '0' || keyCode === ENTER || key === '1') {
+          gameState = GAME_STATES.INSTRUCTION;
+          playUIProgressSound();
+          console.log('Game starting with language: English (deployment mode)');
+        }
       }
       break;
       
@@ -262,15 +272,25 @@ function checkSerialData() {
             
             switch (gameState) {
               case GAME_STATES.START:
-                if (currentString === "0") {
-                  // Button 0 cycles through languages (like spacebar)
-                  cycleLanguage();
-                  playUIProgressSound();
-                } else if (currentString === "1") {
-                  // Button 1 starts the game (like enter)
-                  gameState = GAME_STATES.INSTRUCTION;
-                  playUIProgressSound();
-                  console.log('Game starting with language:', getSelectedLanguage().name);
+                if (DEPLOYMENT_CONFIG.enableLanguageSelection) {
+                  // Original behavior: button 0 cycles languages, button 1 starts
+                  if (currentString === "0") {
+                    // Button 0 cycles through languages (like spacebar)
+                    cycleLanguage();
+                    playUIProgressSound();
+                  } else if (currentString === "1") {
+                    // Button 1 starts the game (like enter)
+                    gameState = GAME_STATES.INSTRUCTION;
+                    playUIProgressSound();
+                    console.log('Game starting with language:', getSelectedLanguage().name);
+                  }
+                } else {
+                  // Deployment behavior: both buttons proceed to instruction
+                  if (currentString === "0" || currentString === "1") {
+                    gameState = GAME_STATES.INSTRUCTION;
+                    playUIProgressSound();
+                    console.log('Game starting with language: English (deployment mode)');
+                  }
                 }
                 break;
                 
