@@ -43,7 +43,7 @@ function drawStartScreen() {
     imageMode(CENTER);
 
     let startX = width / 2;
-    let startY = height * 0.8;
+    let startY = height * 0.765;
     let startWidth = width * 0.25; // Adjust size as needed
     let startHeight = startWidth * (startBtn ? startBtn.height / startBtn.width : 0.6);
     image(startBtn, startX, startY, startWidth, startHeight);
@@ -59,7 +59,7 @@ function drawStartScreen() {
     textSize(width * 0.02);
     textStyle(BOLD);
     fill(COLORS.white);
-    text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.935);
+    text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.86);
   }
 
   pop();
@@ -140,7 +140,7 @@ function drawInstructionScreen() {
   textStyle(BOLD);
   fill(COLORS.white);
   textAlign(CENTER, CENTER);
-  text(getText('instructionPrompt'), width / 2, height * 0.935);
+  text(getText('instructionPrompt'), width / 2, height * 0.86);
 
   pop();
 }
