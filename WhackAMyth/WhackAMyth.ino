@@ -1,6 +1,6 @@
-const int buttonPin1 = 2;
+const int buttonPin1 = 2; // red
 const int ledPin1    = 13;
-const int buttonPin2 = 7;
+const int buttonPin2 = 7; // green
 const int ledPin2    = 8;
 
 void setup() {
