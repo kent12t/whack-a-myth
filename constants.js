@@ -4,7 +4,12 @@ const DEPLOYMENT_CONFIG = {
   // Set to true to re-enable full language selection functionality
   // When false: only English is used, language buttons are hidden, both 0/spacebar and 1/enter proceed from start screen
   // When true: original behavior with language cycling and selection
-  enableLanguageSelection: false
+  enableLanguageSelection: true,
+  
+  // Database configuration
+  // Set to 'csv' to use local CSV file storage instead of Supabase/localStorage
+  // Set to 'supabase' to use original Supabase + localStorage fallback behavior
+  databaseMode: 'csv'
 };
 
 const GAME_CONFIG = {
@@ -42,7 +47,7 @@ const LANGUAGE_COLORS = {
 const UI_TEXT = {
   en: {
     // Start screen
-    startSubtitle: "Ready to bust some myths and uncover the truth?",
+    startSubtitle: "Ready to bust some myths?",
     startInstruction: "HAMMER MYTH TO SELECT LANGUAGE AND HAMMER TRUTH TO START!",
     
     // Instruction screen

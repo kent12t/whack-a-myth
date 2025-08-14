@@ -97,7 +97,7 @@ function drawLanguageSelection() {
 
     // Handle multi-line labels
     let lines = LANGUAGES[i].label.split('\n');
-    let lineHeight = 24 * 1080 / height;
+    let lineHeight = height * 0.03;
     let totalTextHeight = (lines.length - 1) * lineHeight;
     let centerY = buttonY - height * 0.012;
     let startY = centerY - totalTextHeight / 2;

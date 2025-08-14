@@ -1,5 +1,6 @@
 // Database utilities for Supabase integration
 import { createClient } from '@supabase/supabase-js';
+import { CSVDatabase } from './csvDatabase.js';
 
 // Debug environment variables
 console.log('Environment check:', {
@@ -15,15 +16,31 @@ const supabaseKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
 
 let supabase = null;
 let hasLoggedOfflineWarning = false;
+let csvDatabase = null;
 
-// Initialize Supabase client if environment variables are available
-if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey);
-  console.log('Database connection available');
+// Check database mode from constants
+const getDatabaseMode = () => {
+  // Access DEPLOYMENT_CONFIG from window (since constants.js sets it globally)
+  return window.DEPLOYMENT_CONFIG?.databaseMode || 'supabase';
+};
+
+// Initialize database based on configuration
+const databaseMode = getDatabaseMode();
+
+if (databaseMode === 'csv') {
+  // Use CSV database
+  csvDatabase = new CSVDatabase();
+  console.log('CSV Database mode enabled');
 } else {
-  console.log('Running in offline mode - using localStorage for data storage');
-  console.log('Missing env vars:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey });
-  hasLoggedOfflineWarning = true;
+  // Original Supabase behavior
+  if (supabaseUrl && supabaseKey) {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('Database connection available');
+  } else {
+    console.log('Running in offline mode - using localStorage for data storage');
+    console.log('Missing env vars:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey });
+    hasLoggedOfflineWarning = true;
+  }
 }
 
 // Game session tracking
@@ -83,6 +100,19 @@ function saveSessionToLocal(session) {
  * @returns {number|null} Database record ID or null if both database and localStorage fail
  */
 export async function startGameSession() {
+  // Use CSV database if enabled
+  if (csvDatabase) {
+    try {
+      const sessionId = csvDatabase.startGameSession();
+      currentGameSession = csvDatabase.getCurrentSession();
+      return sessionId;
+    } catch (error) {
+      console.error('CSV database error:', error);
+      return null;
+    }
+  }
+
+  // Original Supabase/localStorage logic
   const startTime = new Date().toISOString();
   
   // Try database first if available
@@ -137,6 +167,19 @@ export async function startGameSession() {
  * @returns {boolean} Success status
  */
 export async function endGameSession(finalScore) {
+  // Use CSV database if enabled
+  if (csvDatabase) {
+    try {
+      const success = await csvDatabase.endGameSession(finalScore);
+      currentGameSession = null;
+      return success;
+    } catch (error) {
+      console.error('CSV database error:', error);
+      return false;
+    }
+  }
+
+  // Original Supabase/localStorage logic
   if (!currentGameSession) {
     return false;
   }
@@ -202,6 +245,9 @@ export async function endGameSession(finalScore) {
  * @returns {object|null} Current session data or null
  */
 export function getCurrentSession() {
+  if (csvDatabase) {
+    return csvDatabase.getCurrentSession();
+  }
   return currentGameSession;
 }
 
@@ -210,6 +256,9 @@ export function getCurrentSession() {
  * @returns {boolean} Database availability status
  */
 export function isDatabaseAvailable() {
+  if (csvDatabase) {
+    return csvDatabase.isDatabaseAvailable();
+  }
   return supabase !== null;
 }
 
@@ -218,6 +267,9 @@ export function isDatabaseAvailable() {
  * @returns {Array} Array of game sessions
  */
 export function getStoredSessions() {
+  if (csvDatabase) {
+    return csvDatabase.getStoredSessions();
+  }
   return getLocalData(STORAGE_KEYS.GAME_SESSIONS, []);
 }
 
@@ -226,7 +278,11 @@ export function getStoredSessions() {
  * @returns {object} Statistics object
  */
 export function getGameStats() {
-  const sessions = getStoredSessions();
+  if (csvDatabase) {
+    return csvDatabase.getGameStats();
+  }
+  
+  const sessions = getLocalData(STORAGE_KEYS.GAME_SESSIONS, []);
   const completedSessions = sessions.filter(s => s.end_time && s.result !== undefined);
   
   if (completedSessions.length === 0) {
@@ -260,6 +316,10 @@ export function getGameStats() {
  * @returns {boolean} Success status
  */
 export function clearStoredData() {
+  if (csvDatabase) {
+    return csvDatabase.clearStoredData();
+  }
+  
   try {
     localStorage.removeItem(STORAGE_KEYS.GAME_SESSIONS);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
