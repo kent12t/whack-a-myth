@@ -4,7 +4,7 @@ taskkill /F /IM msedge.exe
 
 REM Launch Edge with kiosk mode and various flags to disable unwanted features
 start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" ^
-  --kiosk "http://localhost:4173" ^
+  --kiosk "http://localhost:3000" ^
   --edge-kiosk-type=fullscreen ^
   --disable-pinch ^
   --overscroll-history-navigation=0 ^
