@@ -4,8 +4,6 @@
 .env.test.local
 .env.development
 .env.production
-.env.test
-.env
 
 .vscode
 
