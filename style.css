@@ -12,12 +12,29 @@ canvas {
     display: block;
 }
 
-/* Font Face */
+/* Font Face Declarations */
 @font-face {
   font-family: 'CircularStd-Bold';
   src: url('assets/CircularStd-Bold.otf') format('opentype');
   font-weight: bold;
   font-style: normal;
+  font-display: swap; /* Improves loading performance */
+}
+
+@font-face {
+  font-family: 'NotoSansTamil-Bold';
+  src: url('assets/NotoSansTamil-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PingFang-Semibold';
+  src: url('assets/PingFang-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Custom P5.js Loader Styles */

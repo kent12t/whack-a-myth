@@ -21,6 +21,13 @@ function drawStartScreen() {
     textSize(width * 0.016);
     textStyle(NORMAL);
     fill(COLORS.white);
+    
+    // Set appropriate font for current language
+    const subtitleFont = getCurrentFont();
+    if (subtitleFont) {
+      textFont(subtitleFont);
+    }
+    
     text(getText('startSubtitle'), width / 2, height * 0.66);
 
     // Language selection SVGs
@@ -31,11 +38,19 @@ function drawStartScreen() {
     textSize(width * 0.016);
     textStyle(BOLD);
     fill(COLORS.white);
-    // Top line: Always English
+    
+    // Top line: Always English (use default font)
+    textFont(gameFont);
     text(UI_TEXT.en.startInstruction, width / 2, height * 0.9);
+    
     // Bottom line: Only show if language is not English
     const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
     if (currentLang !== 'en') {
+      // Set appropriate font for current language
+      const instructionFont = getCurrentFont();
+      if (instructionFont) {
+        textFont(instructionFont);
+      }
       text(getText('startInstruction'), width / 2, height * 0.94);
     }
   } else {
@@ -103,6 +118,12 @@ function drawLanguageSelection() {
     let startY = centerY - totalTextHeight / 2;
 
     for (let j = 0; j < lines.length; j++) {
+      // Set the appropriate font for this language
+      const languageFont = getFontForLanguage(LANGUAGES[i].code);
+      if (languageFont) {
+        textFont(languageFont);
+      }
+      
       fill(COLORS.white);
       text(lines[j], x + width * 0.006, startY + (j * lineHeight));
     }
@@ -210,6 +231,13 @@ function drawGameScreen() {
   // Draw score
   imageMode(CENTER);
   image(scoreBg, width * 0.85, height * 0.1, width * 0.2, width * 0.2 * (scoreBg.height / scoreBg.width));
+  
+  // Set appropriate font for score display (use number-safe font)
+  const scoreFont = getFontForNumbers();
+  if (scoreFont) {
+    textFont(scoreFont);
+  }
+  
   textSize(width * 0.0292);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
@@ -247,6 +275,12 @@ function drawEndScreen() {
   drawStarRating(starX, height * 0.15);
 
   // Display score - adjust position based on layout
+  // Set appropriate font for end screen score (use number-safe font)
+  const endScoreFont = getFontForNumbers();
+  if (endScoreFont) {
+    textFont(endScoreFont);
+  }
+  
   fill(COLORS.white);
   textSize(width * 0.0375);
   textAlign(CENTER, CENTER);
@@ -260,13 +294,60 @@ function drawEndScreen() {
   }
 
   // Idle timer display
+  // Set appropriate font for timer text
+  const timerFont = getCurrentFont();
+  if (timerFont) {
+    textFont(timerFont);
+  }
+  
   fill(COLORS.white);
   textSize(width * 0.02);
   text(getText('endRestartPrompt'), width / 2, height * 0.92);
+  
+  // Timer countdown - handle numbers specially for Chinese and Tamil
   textSize(width * 0.01);
   textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((TIMING.END_SCREEN_DURATION - (TIMING.END_SCREEN_DURATION - endScreenTimer)) / 60);
-  text(getText('autoRestartMessage', { timeLeft }), width / 2, height * 0.965);
+  
+  const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  if (currentLang === 'zh') {
+    // For Chinese, split the timer message to render number and text separately
+    const beforeText = "将于";
+    const afterText = "秒后自动重启";
+    
+    // Calculate positions for centered text
+    const numberFont = getFontForNumbers();
+    const languageFont = getCurrentFont();
+    
+    // Measure text widths to center properly
+    if (languageFont) textFont(languageFont);
+    const beforeWidth = textWidth(beforeText);
+    const afterWidth = textWidth(afterText);
+    
+    if (numberFont) textFont(numberFont);
+    const numberWidth = textWidth(timeLeft.toString());
+    
+    const totalWidth = beforeWidth + numberWidth + afterWidth;
+    const startX = width / 2 - totalWidth / 2;
+    
+    // Draw the three parts
+    if (languageFont) textFont(languageFont);
+    text(beforeText, startX + beforeWidth/2, height * 0.965);
+    
+    if (numberFont) textFont(numberFont);
+    text(timeLeft, startX + beforeWidth + numberWidth/2, height * 0.965);
+    
+    if (languageFont) textFont(languageFont);
+    text(afterText, startX + beforeWidth + numberWidth + afterWidth/2, height * 0.965);
+    
+  } else if (currentLang === 'ta') {
+    // For Tamil, render timer message with current font (numbers will use default via getFontForNumbers already set above)
+    const timerMessage = getText('autoRestartMessage', { timeLeft });
+    text(timerMessage, width / 2, height * 0.965);
+  } else {
+    // For other languages, use regular font
+    text(getText('autoRestartMessage', { timeLeft }), width / 2, height * 0.965);
+  }
 
   // Handle idle timer
   endScreenTimer--;
@@ -420,6 +501,12 @@ function drawMissedBalloons() {
     }
 
     // Draw myth/truth text on balloon
+    // Set appropriate font for balloon text
+    const balloonTextFont = getCurrentFont();
+    if (balloonTextFont) {
+      textFont(balloonTextFont);
+    }
+    
     textAlign(CENTER, CENTER);
     textSize(balloonSize * 0.035);
 
@@ -442,6 +529,12 @@ function drawMissedBalloons() {
     // Move to label position first, then rotate
     translate(labelX, labelY);
     rotate(-PI / 6); // Slightly less rotation for better readability
+
+    // Set appropriate font for label text
+    const labelFont = getCurrentFont();
+    if (labelFont) {
+      textFont(labelFont);
+    }
 
     textAlign(CENTER, CENTER);
     textSize(balloonSize * 0.03);
@@ -513,15 +606,49 @@ function drawFeedback() {
   fill(red(color(COLORS.accent)), green(color(COLORS.accent)), blue(color(COLORS.accent)), fadeAlpha);
 
   if (feedbackData.isCorrect) {
-    // Correct feedback
+    // Correct feedback text
+    const feedbackTextFont = getCurrentFont();
+    if (feedbackTextFont) {
+      textFont(feedbackTextFont);
+    }
     textSize(width * 0.0208);
     textStyle(BOLD);
     text(getText('correctFeedback'), feedbackX, feedbackY - width * 0.011);
 
+    // Points display - use number-safe font for the score part
     textSize(width * 0.025);
-    text(`+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`, feedbackX, feedbackY + width * 0.011);
+    const pointsText = `+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`;
+    
+    // For Chinese and Tamil, render the number and text parts separately
+    const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+    if (currentLang === 'zh' || currentLang === 'ta') {
+      // Split into number and text parts
+      const numberPart = `+${SCORE_VALUES.CORRECT}`;
+      const textPart = ` ${getText('pointsSuffix')}`;
+      
+      // Measure text to position properly
+      const numberFont = getFontForNumbers();
+      const languageFont = getCurrentFont();
+      
+      // Draw number part
+      if (numberFont) textFont(numberFont);
+      const numberWidth = textWidth(numberPart);
+      text(numberPart, feedbackX - textWidth(textPart)/2, feedbackY + width * 0.011);
+      
+      // Draw text part
+      if (languageFont) textFont(languageFont);
+      text(textPart, feedbackX + numberWidth/2, feedbackY + width * 0.011);
+    } else {
+      // For other languages, use regular font
+      text(pointsText, feedbackX, feedbackY + width * 0.011);
+    }
   } else {
-    // Wrong feedback
+    // Wrong feedback - use current font for all text
+    const feedbackFont = getCurrentFont();
+    if (feedbackFont) {
+      textFont(feedbackFont);
+    }
+    
     textSize(width * 0.0208);
     textStyle(BOLD);
     text(getText('wrongFeedback'), feedbackX, feedbackY - width * 0.011);

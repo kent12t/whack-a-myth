@@ -33,6 +33,12 @@ function drawLanguageButton(index, x, y, w, h = null) {
 function cycleLanguage() {
   selectedLanguageIndex = (selectedLanguageIndex + 1) % LANGUAGES.length;
   console.log('Language selected:', LANGUAGES[selectedLanguageIndex].name);
+  
+  // Update font when language changes
+  const currentFont = getCurrentFont();
+  if (currentFont) {
+    textFont(currentFont);
+  }
 }
 
 /**

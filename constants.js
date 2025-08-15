@@ -162,7 +162,7 @@ const UI_TEXT = {
     
     // End screen
     endRestartPrompt: "தொடங்குவதற்கு ஏதேனும் ஒரு பொத்தானை சுத்தியால் தட்டவும்.",
-    autoRestartMessage: "${timeLeft} நொடிகளில் தானாக மீண்டும் தொடங்கும்",
+    autoRestartMessage: "${timeLeft}  நொடிகளில் தானாக மீண்டும் தொடங்கும்",
     
     // Missed balloons labels
     truthLabel: "இது\nஓர் உண்மை.",
@@ -170,7 +170,7 @@ const UI_TEXT = {
     
     // Feedback messages
     correctFeedback: "நீங்கள் வென்று விட்டீர்கள்!",
-    pointsSuffix: "புள்ளிகள்",
+    pointsSuffix: " புள்ளிகள்",
     wrongFeedback: "இல்லை!",
     truthWord: "ஓர் உண்மை",
     mythWord: "ஒரு கட்டுக்கதை",
@@ -263,6 +263,99 @@ function getMythList() {
   return getLocalizedMythList();
 }
 
+// Helper function to check if a font is properly loaded
+function isFontLoaded(font) {
+  return font && typeof font === 'object' && font.font;
+}
+
+// Debug function to log font status
+function debugFontStatus() {
+  console.log('🔍 Font Debug Status:');
+  console.log('  gameFont loaded:', isFontLoaded(window.gameFont));
+  console.log('  notoSansFont loaded:', isFontLoaded(window.notoSansFont));
+  console.log('  pingFangFont loaded:', isFontLoaded(window.pingFangFont));
+  
+  if (window.getSelectedLanguage) {
+    const currentLang = window.getSelectedLanguage().code;
+    console.log('  Current language:', currentLang);
+    console.log('  Current font should be:', getCurrentFont() === window.gameFont ? 'gameFont' : 
+                getCurrentFont() === window.notoSansFont ? 'notoSansFont' : 
+                getCurrentFont() === window.pingFangFont ? 'pingFangFont' : 'unknown');
+  }
+}
+
+// Helper function to get appropriate font based on current language
+function getCurrentFont() {
+  // In deployment mode, always use English (default font)
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil
+      if (isFontLoaded(window.notoSansFont)) {
+        return window.notoSansFont;
+      } else {
+        console.warn('⚠️ Tamil font not loaded, using fallback');
+        return window.gameFont;
+      }
+    case 'zh': // Chinese
+      if (isFontLoaded(window.pingFangFont)) {
+        return window.pingFangFont;
+      } else {
+        console.warn('⚠️ Chinese font not loaded, using fallback');
+        return window.gameFont;
+      }
+    case 'en': // English
+    case 'ms': // Bahasa Melayu
+    default:
+      return window.gameFont; // Default font for English and Malay
+  }
+}
+
+// Helper function to get font for numbers - Chinese and Tamil use default font for numbers
+function getFontForNumbers() {
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  // Always use default font for numbers in Chinese and Tamil to avoid rendering issues
+  if (lang === 'zh') {
+    // console.log('🔢 Using default font for numbers in Chinese mode');
+    return window.gameFont;
+  } else if (lang === 'ta') {
+    // console.log('🔢 Using default font for numbers in Tamil mode');
+    return window.gameFont;
+  }
+  
+  // For other languages, use the same logic as getCurrentFont
+  return getCurrentFont();
+}
+
+// Helper function to get appropriate font for a specific language code
+function getFontForLanguage(languageCode) {
+  switch (languageCode) {
+    case 'ta': // Tamil
+      if (isFontLoaded(window.notoSansFont)) {
+        return window.notoSansFont;
+      } else {
+        console.warn('⚠️ Tamil font not available for language selection');
+        return window.gameFont;
+      }
+    case 'zh': // Chinese
+      if (isFontLoaded(window.pingFangFont)) {
+        return window.pingFangFont;
+      } else {
+        console.warn('⚠️ Chinese font not available for language selection');
+        return window.gameFont;
+      }
+    case 'en': // English
+    case 'ms': // Bahasa Melayu
+    default:
+      return window.gameFont;
+  }
+}
+
 // Make constants globally available for p5.js compatibility and module access
 window.GAME_CONFIG = GAME_CONFIG;
 window.DEPLOYMENT_CONFIG = DEPLOYMENT_CONFIG;
@@ -271,6 +364,11 @@ window.LANGUAGES = LANGUAGES;
 window.LANGUAGE_COLORS = LANGUAGE_COLORS;
 window.UI_TEXT = UI_TEXT;
 window.getText = getText;
+window.isFontLoaded = isFontLoaded;
+window.debugFontStatus = debugFontStatus;
+window.getCurrentFont = getCurrentFont;
+window.getFontForNumbers = getFontForNumbers;
+window.getFontForLanguage = getFontForLanguage;
 window.MYTH_TRUTH_VALUES = MYTH_TRUTH_VALUES;
 window.getLocalizedMythList = getLocalizedMythList;
 window.getMythList = getMythList;

@@ -67,6 +67,11 @@ class Myth {
     pop();
 
     // Add text shadow effect
+    // Set appropriate font for balloon text
+    const balloonFont = getCurrentFont();
+    if (balloonFont) {
+      textFont(balloonFont);
+    }
 
     fill(0, 0, 0, 100);
     textSize(this.size * 0.04);

@@ -47,9 +47,10 @@ function setup() {
 
   mythSize = width * 0.6;
 
-  // Apply the custom font
-  if (gameFont) {
-    textFont(gameFont);
+  // Apply the appropriate font based on language
+  const currentFont = getCurrentFont();
+  if (currentFont) {
+    textFont(currentFont);
   }
 
     // Initialize serial communication

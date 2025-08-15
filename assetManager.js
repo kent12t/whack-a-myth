@@ -153,9 +153,35 @@ window.addEventListener('DOMContentLoaded', function () {
 // Preload function to load all images, font and explosion frames
 function preload() {
   assets.backgroundImage = loadImage('assets/city.jpg');
-  assets.gameFont = loadFont('assets/CircularStd-Bold.otf');
-  assets.notoSansFont = loadFont('assets/NotoSansTamil-Bold.ttf');
-  assets.pingFangFont = loadFont('assets/PingFang-Semibold.ttf');
+  
+  // Load fonts with error handling
+  assets.gameFont = loadFont('assets/CircularStd-Bold.otf', 
+    () => console.log('✅ Default font loaded successfully'),
+    (err) => console.error('❌ Failed to load default font:', err)
+  );
+  
+  assets.notoSansFont = loadFont('assets/NotoSansTamil-Bold.ttf',
+    () => console.log('✅ Tamil font loaded successfully'),
+    (err) => {
+      console.error('❌ Failed to load Tamil font:', err);
+      console.log('📝 Tamil text will fallback to default font');
+    }
+  );
+  
+  assets.pingFangFont = loadFont('assets/PingFang-Semibold.ttf',
+    () => {
+      console.log('✅ Chinese font loaded successfully');
+      console.log('🔍 PingFang font object:', assets.pingFangFont);
+      // Test if the font can render numbers
+      if (assets.pingFangFont && assets.pingFangFont.font) {
+        console.log('🔤 PingFang font has glyph support');
+      }
+    },
+    (err) => {
+      console.error('❌ Failed to load Chinese font:', err);
+      console.log('📝 Chinese text will fallback to default font');
+    }
+  );
   assets.startBtn = loadImage('assets/start.png');
   assets.logo = loadImage('assets/logo.png');
   assets.scoreBg = loadImage('assets/score.png');
