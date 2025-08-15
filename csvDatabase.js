@@ -1,9 +1,12 @@
-// Simple CSV Database implementation using P5.js file operations
+// Simple CSV Database implementation using device-specific files
 // This provides an offline-only alternative to the Supabase/localStorage approach
+
+import { getDeviceId } from './deviceId.js';
 
 class CSVDatabase {
   constructor() {
-    this.csvFileName = 'game_sessions.csv';
+    this.deviceId = getDeviceId();
+    this.csvFileName = `game_sessions_${this.deviceId}.csv`;
     this.currentSession = null;
     this.sessionCounter = 0;
     this.csvData = []; // Cache for CSV data
@@ -17,11 +20,12 @@ class CSVDatabase {
    */
   loadCSVData() {
     try {
-      // Load data from localStorage (persists across sessions)
-      const storedData = localStorage.getItem('csv_game_sessions_data');
+      // Load data from device-specific localStorage key
+      const storageKey = `csv_game_sessions_data_${this.deviceId}`;
+      const storedData = localStorage.getItem(storageKey);
       if (storedData) {
         this.csvData = JSON.parse(storedData);
-        console.log('CSV database loaded from localStorage:', this.csvData.length, 'sessions');
+        console.log(`CSV database loaded from localStorage for device ${this.deviceId}:`, this.csvData.length, 'sessions');
         
         // Set session counter to highest ID + 1
         if (this.csvData.length > 0) {
@@ -29,7 +33,7 @@ class CSVDatabase {
           this.sessionCounter = maxId;
         }
       } else {
-        console.log('No existing CSV data found, starting fresh');
+        console.log(`No existing CSV data found for device ${this.deviceId}, starting fresh`);
         this.csvData = [];
         this.sessionCounter = 0;
       }
@@ -47,7 +51,8 @@ class CSVDatabase {
    */
   saveToLocalStorage() {
     try {
-      localStorage.setItem('csv_game_sessions_data', JSON.stringify(this.csvData));
+      const storageKey = `csv_game_sessions_data_${this.deviceId}`;
+      localStorage.setItem(storageKey, JSON.stringify(this.csvData));
       return true;
     } catch (error) {
       console.error('Error saving to localStorage:', error);
@@ -60,20 +65,27 @@ class CSVDatabase {
    */
   async addSessionToCSV(sessionData) {
     try {
-      // Send to server to append to actual CSV file
+      // Add device ID to session data
+      const sessionWithDevice = {
+        ...sessionData,
+        device_id: this.deviceId
+      };
+
+      // Send to server to append to device-specific CSV file
       const response = await fetch('/append-csv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(sessionData)
+        body: JSON.stringify(sessionWithDevice)
       });
 
       if (response.ok) {
+        const result = await response.json();
         // Also add to local cache and localStorage
         this.csvData.push(sessionData);
         this.saveToLocalStorage();
-        console.log('Session added to CSV file in public/ folder:', sessionData);
+        console.log(`Session added to CSV file: ${result.file}`, sessionData);
         return true;
       } else {
         console.error('Failed to append to CSV file');
@@ -213,8 +225,9 @@ class CSVDatabase {
       this.csvData = [];
       this.sessionCounter = 0;
       
-      // Clear from localStorage
-      localStorage.removeItem('csv_game_sessions_data');
+      // Clear from device-specific localStorage
+      const storageKey = `csv_game_sessions_data_${this.deviceId}`;
+      localStorage.removeItem(storageKey);
       
       console.log('All CSV game data cleared from memory and localStorage');
       console.log('Note: CSV file in public/ folder still exists - delete manually if needed');

@@ -1,6 +1,7 @@
 // Database utilities for Supabase integration
 import { createClient } from '@supabase/supabase-js';
 import { CSVDatabase } from './csvDatabase.js';
+import './deviceId.js'; // Load device ID functionality
 
 // Debug environment variables
 console.log('Environment check:', {
