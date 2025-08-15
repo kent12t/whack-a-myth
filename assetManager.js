@@ -4,6 +4,8 @@ const assets = {
   explosionFrames: [],
   backgroundImage: null,
   gameFont: null,
+  notoSansFont: null,
+  pingFangFont: null,
   startBtn: null,
   logo: null,
   scoreBg: null,
@@ -42,6 +44,16 @@ Object.defineProperty(window, 'backgroundImage', {
 Object.defineProperty(window, 'gameFont', {
   get: () => assets.gameFont,
   set: (value) => assets.gameFont = value
+});
+
+Object.defineProperty(window, 'notoSansFont', {
+  get: () => assets.notoSansFont,
+  set: (value) => assets.notoSansFont = value
+});
+
+Object.defineProperty(window, 'pingFangFont', {
+  get: () => assets.pingFangFont,
+  set: (value) => assets.pingFangFont = value
 });
 
 Object.defineProperty(window, 'startBtn', {
@@ -142,6 +154,8 @@ window.addEventListener('DOMContentLoaded', function () {
 function preload() {
   assets.backgroundImage = loadImage('assets/city.jpg');
   assets.gameFont = loadFont('assets/CircularStd-Bold.otf');
+  assets.notoSansFont = loadFont('assets/NotoSansTamil-Bold.ttf');
+  assets.pingFangFont = loadFont('assets/PingFang-Semibold.ttf');
   assets.startBtn = loadImage('assets/start.png');
   assets.logo = loadImage('assets/logo.png');
   assets.scoreBg = loadImage('assets/score.png');
