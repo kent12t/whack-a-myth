@@ -117,25 +117,25 @@ const UI_TEXT = {
   },
   zh: {
     // Start screen
-    startSubtitle: "准备好打破迷思，揭开真相了吗？",
+    startSubtitle: "准备好打破迷思，揭开真相了吗?",
     // startInstruction: "锤击红色选择语言，锤击绿色开始游戏！",
-    startInstruction: "锤击红色按钮选择语言，锤击绿色按钮开始游戏！！",
+    startInstruction: "锤击红色按钮选择语言，锤击绿色按钮开始游戏!",
     
     // Instruction screen
-    instructionPrompt: "敲击任意按钮开始游戏！",
+    instructionPrompt: "敲击任意按钮开始游戏!",
     
     // End screen
-    endRestartPrompt: "敲击任意按钮重新开始！",
+    endRestartPrompt: "敲击任意按钮重新开始!",
     autoRestartMessage: "将于${timeLeft}秒后自动重启",
     
     // Missed balloons labels
-    truthLabel: "这是\n真相！",
-    mythLabel: "这是\n迷思！",
+    truthLabel: "这是\n真相!",
+    mythLabel: "这是\n迷思!",
     
     // Feedback messages
-    correctFeedback: "恭喜您答对了！",
+    correctFeedback: "恭喜您答对了!",
     pointsSuffix: "分",
-    wrongFeedback: "哎呀！",
+    wrongFeedback: "哎呀!",
     truthWord: "真相",
     mythWord: "迷思",
     escapeMessage: "你让${truthType}飞走了",
@@ -148,7 +148,7 @@ const UI_TEXT = {
       "衰老意味着\n放弃目标。",
       "年龄越大，\n自由与智慧越深。",
       "发色，不能定\n义年龄。",
-      "行为应与年\n龄相称！"
+      "行为应与年\n龄相称!"
     ]
   },
   ta: {
