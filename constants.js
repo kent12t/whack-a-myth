@@ -14,7 +14,7 @@ const DEPLOYMENT_CONFIG = {
 
 const GAME_CONFIG = {
   aspectRatio: 16 / 9,
-  balloonColors: ['darkblue', 'green', 'midblue', 'orange', 'red', 'violet', 'yellow']
+  balloonColors: ['darkblue', 'green', 'orange', 'red', 'violet', 'yellow']
 };
 
 // Color palette - Vibrant and happy!
@@ -174,7 +174,7 @@ const UI_TEXT = {
     wrongFeedback: "இல்லை!",
     truthWord: "ஓர் உண்மை",
     mythWord: "ஒரு கட்டுக்கதை",
-    escapeMessage: "நீங்கள் ${truthType} பறக்கவிட்டீர்கள்",
+    escapeMessage: "நீங்கள் ${truthType} தப்பிச் செல்ல விட்டீர்கள",
     wrongChoiceMessage: "இது உண்மையாகவே ${truthType} தான்",
     
     // Myths content
