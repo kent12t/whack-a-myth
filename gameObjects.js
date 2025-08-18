@@ -63,28 +63,46 @@ class Myth {
     push();
     translate(0, this.size / 7); // Move balloon back to its position relative to text
     imageMode(CENTER);
-    image(balloonImages[GAME_CONFIG.balloonColors.indexOf(this.color)], 0, 0, this.size, this.size);
+    
+    // Check if Tamil language is selected and use appropriate balloon images
+    const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+    if (currentLang === 'ta' && balloonImagesTa && balloonImagesTa.length > 0) {
+      // Use Tamil balloon images (with text embedded)
+      const balloonIndex = GAME_CONFIG.balloonColors.indexOf(this.color);
+      if (balloonImagesTa[balloonIndex]) {
+        image(balloonImagesTa[balloonIndex], 0, 0, this.size, this.size);
+      } else {
+        // Fallback to regular balloon if Tamil image not available
+        image(balloonImages[balloonIndex], 0, 0, this.size, this.size);
+      }
+    } else {
+      // Use regular balloon images and add text overlay
+      image(balloonImages[GAME_CONFIG.balloonColors.indexOf(this.color)], 0, 0, this.size, this.size);
+    }
     pop();
 
-    // Add text shadow effect
-    // Set appropriate font for balloon text
-    const balloonFont = getCurrentFont();
-    if (balloonFont) {
-      textFont(balloonFont);
+    // Only draw text overlay if NOT using Tamil images (since Tamil images have text embedded)
+    if (!(currentLang === 'ta' && balloonImagesTa && balloonImagesTa.length > 0)) {
+      // Add text shadow effect
+      // Set appropriate font for balloon text
+      const balloonFont = getCurrentFont();
+      if (balloonFont) {
+        textFont(balloonFont);
+      }
+
+      fill(0, 0, 0, 100);
+      textSize(getFontSizeFromObject(this.size, 0.04));
+      textAlign(CENTER, CENTER);
+      textStyle(BOLD);
+      text(this.text, 2, 2); // Offset for shadow effect
+
+      // Myth text
+      blendMode(BLEND);
+      fill(COLORS.white);
+      textSize(getFontSizeFromObject(this.size, 0.04));
+      text(this.text, 0, 0); // Centered at origin after translate
+      textStyle(NORMAL);
     }
-
-    fill(0, 0, 0, 100);
-    textSize(getFontSizeFromObject(this.size, 0.04));
-    textAlign(CENTER, CENTER);
-    textStyle(BOLD);
-    text(this.text, 2, 2); // Offset for shadow effect
-
-    // Myth text
-    blendMode(BLEND);
-    fill(COLORS.white);
-    textSize(getFontSizeFromObject(this.size, 0.04));
-    text(this.text, 0, 0); // Centered at origin after translate
-    textStyle(NORMAL);
 
     pop();
   }

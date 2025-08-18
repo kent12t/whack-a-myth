@@ -9,49 +9,62 @@ function drawStartScreen() {
   imageMode(CENTER);
 
   if (DEPLOYMENT_CONFIG.enableLanguageSelection) {
-    // Title logo (original behavior)
-    let logoX = width / 2;
-    let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
-    let logoWidth = width * 0.6;
-    let logoHeight = logoWidth * logo.height / logo.width;
-    image(logo, logoX, logoY, logoWidth, logoHeight);
-
-    // Subtitle
-    textAlign(CENTER, CENTER);
-    textSize(getFontSize(0.016));
-    textStyle(NORMAL);
-    fill(COLORS.white);
-    
-    // Set appropriate font for current language
-    const subtitleFont = getCurrentFont();
-    if (subtitleFont) {
-      textFont(subtitleFont);
-    }
-    
-    text(getText('startSubtitle'), width / 2, height * 0.66);
-
-    // Language selection SVGs
-    drawLanguageSelection();
-
-    // Instructions
-    textAlign(CENTER, CENTER);
-    textSize(getFontSize(0.016));
-    textStyle(BOLD);
-    fill(COLORS.white);
-    
-    // Top line: Always English (use default font)
-    textFont(gameFont);
-    text(UI_TEXT.en.startInstruction, width / 2, height * 0.89);
-    
-    // Bottom line: Only show if language is not English
     const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
-    if (currentLang !== 'en') {
+    
+    if (currentLang === 'ta') {
+      // Tamil version - use start-ta.png as background with logo overlay
+      if (startTa) {
+        const startImgWidth = width;
+        const startImgHeight = height;
+        image(startTa, width / 2, height / 2, startImgWidth, startImgHeight);
+      }
+      
+      // Always show the logo on top for Tamil
+      let logoX = width / 2;
+      let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
+      let logoWidth = width * 0.6;
+      let logoHeight = logoWidth * logo.height / logo.width;
+      image(logo, logoX, logoY, logoWidth, logoHeight);
+      
+      // Language selection buttons only (no text)
+      drawLanguageSelection();
+    } else {
+      // Other languages - original behavior with text
+      // Title logo
+      let logoX = width / 2;
+      let logoY = height * 0.35 + sin(frameCount * 0.05) * 5;
+      let logoWidth = width * 0.6;
+      let logoHeight = logoWidth * logo.height / logo.width;
+      image(logo, logoX, logoY, logoWidth, logoHeight);
+
+      // Subtitle
+      textAlign(CENTER, CENTER);
+      textSize(getFontSize(0.016));
+      textStyle(NORMAL);
+      fill(COLORS.white);
+      
+      // Set appropriate font for current language
+      const subtitleFont = getCurrentFont();
+      if (subtitleFont) {
+        textFont(subtitleFont);
+      }
+      
+      text(getText('startSubtitle'), width / 2, height * 0.66);
+
+      // Language selection SVGs
+      drawLanguageSelection();
+
+      // Instructions - show for all languages except Tamil
+      textAlign(CENTER, CENTER);
+      textSize(getFontSize(0.016));
+      textStyle(BOLD);
+      fill(COLORS.white);
+      
       // Set appropriate font for current language
       const instructionFont = getCurrentFont();
       if (instructionFont) {
         textFont(instructionFont);
       }
-      textAlign(CENTER, TOP);
       text(getText('startInstruction'), width / 2, height * 0.92);
     }
   } else {
@@ -120,15 +133,18 @@ function drawLanguageSelection() {
     let centerY = buttonY - height * 0.012;
     let startY = centerY - totalTextHeight / 2;
 
-    for (let j = 0; j < lines.length; j++) {
-      // Set the appropriate font for this language
-      const languageFont = getFontForLanguage(LANGUAGES[i].code);
-      if (languageFont) {
-        textFont(languageFont);
+    // Only draw text if not Tamil (Tamil buttons have text embedded)
+    if (LANGUAGES[i].code !== 'ta') {
+      for (let j = 0; j < lines.length; j++) {
+        // Set the appropriate font for this language
+        const languageFont = getFontForLanguage(LANGUAGES[i].code);
+        if (languageFont) {
+          textFont(languageFont);
+        }
+        
+        fill(COLORS.white);
+        text(lines[j], x + width * 0.006, startY + (j * lineHeight));
       }
-      
-      fill(COLORS.white);
-      text(lines[j], x + width * 0.006, startY + (j * lineHeight));
     }
   }
 }
@@ -139,13 +155,14 @@ function drawInstructionScreen() {
   push();
   imageMode(CENTER);
 
-  // Instruction image
+  // Instruction image - use language-specific version
   let instructionX = width / 2;
   let instructionY = height / 2;
   let instructionWidth = width * 1;
-  let instructionHeight = instructionWidth * instruction.height / instruction.width;
-  image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight)
-  image(instruction, instructionX, instructionY, instructionWidth, instructionHeight);
+  const instructionImg = getInstructionImage();
+  let instructionHeight = instructionWidth * instructionImg.height / instructionImg.width;
+  image(instructionBg, instructionX, instructionY, instructionWidth, instructionHeight);
+  image(instructionImg, instructionX, instructionY, instructionWidth, instructionHeight);
 
   // Yellow balloon (main balloon) - smooth upward floating
   let yellowBalloon = getAnimatedBalloon(width * 0.85, width * 0.3, 'yellow', 1.5, 1, 0, 5);
@@ -159,12 +176,15 @@ function drawInstructionScreen() {
   let violetBalloon = getAnimatedBalloon(width * 0.1, width * 0.3 * 1.2, 'violet', 1.1, 0.8, 300, 8);
   drawBalloon(violetBalloon.x, violetBalloon.y, violetBalloon.size, violetBalloon.color, violetBalloon.rotation);
 
-  // Continue prompt
-  textSize(getFontSize(0.02));
-  textStyle(BOLD);
-  fill(COLORS.white);
-  textAlign(CENTER, CENTER);
-  text(getText('instructionPrompt'), width / 2, height * 0.86);
+  // Continue prompt (only for non-Tamil languages)
+  const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  if (currentLang !== 'ta') {
+    textSize(getFontSize(0.02));
+    textStyle(BOLD);
+    fill(COLORS.white);
+    textAlign(CENTER, CENTER);
+    text(getText('instructionPrompt'), width / 2, height * 0.86);
+  }
 
   pop();
 }
@@ -231,9 +251,10 @@ function drawGameScreen() {
     feedbackTimer--;
   }
 
-  // Draw score
+  // Draw score - use language-specific version
   imageMode(CENTER);
-  image(scoreBg, width * 0.85, height * 0.1, width * 0.2, width * 0.2 * (scoreBg.height / scoreBg.width));
+  const scoreBgImg = getScoreBgImage();
+  image(scoreBgImg, width * 0.85, height * 0.1, width * 0.2, width * 0.2 * (scoreBgImg.height / scoreBgImg.width));
   
   // Set appropriate font for score display (use number-safe font)
   const scoreFont = getFontForNumbers();
@@ -255,20 +276,54 @@ function drawEndScreen() {
 
   // Determine if we have a perfect score (no missed balloons)
   let isPerfectScore = missedBalloons.length === 0;
+  
+  // Check if Tamil language is selected
+  const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  
+  if (currentLang === 'ta' && resultBgTa) {
+    // Tamil version - full-screen background + individual section backgrounds + content
+    image(resultBgTa, width / 2, height / 2, width, height);
+    
+    // Get Tamil language-specific images
+    const resultImages = getResultImages();
+    const reportImages = getReportImages();
 
-  if (isPerfectScore) {
-    // Perfect score - center the result section
-    image(resultBg, width * 0.5, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
-    image(result, width * 0.5, height / 2, height * 0.7 * (result.width / result.height), height * 0.7);
+    if (isPerfectScore) {
+      // Perfect score - center the result section over the background
+      // Render result background (same size as other languages)
+      image(resultBg, width * 0.5, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
+      // Render Tamil result content
+      image(resultImages.result, width * 0.5, height / 2, height * 0.7 * (resultImages.result.width / resultImages.result.height), height * 0.7);
+    } else {
+      // Has missed balloons - show both result and report sections over the background
+      // Result section - centered on width * 0.3
+      image(resultBg, width * 0.3, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
+      image(resultImages.result, width * 0.3, height / 2, height * 0.7 * (resultImages.result.width / resultImages.result.height), height * 0.7);
+
+      // Report section - centered on width * 0.75
+      image(reportBg, width * 0.75, height / 2, height * 0.7 * (reportBg.width / reportBg.height), height * 0.7);
+      image(reportImages.report, width * 0.75, height / 2, height * 0.7 * (reportImages.report.width / reportImages.report.height), height * 0.7);
+    }
   } else {
-    // Has missed balloons - show both result and report sections
-    // Result section - centered on width * 0.3
-    image(resultBg, width * 0.3, height / 2, height * 0.7 * (resultBg.width / resultBg.height), height * 0.7);
-    image(result, width * 0.3, height / 2, height * 0.7 * (result.width / result.height), height * 0.7);
+    // Other languages - use original layout
+    // Get language-specific images
+    const resultImages = getResultImages();
+    const reportImages = getReportImages();
 
-    // Report section - centered on width * 0.75
-    image(reportBg, width * 0.75, height / 2, height * 0.7 * (reportBg.width / reportBg.height), height * 0.7);
-    image(report, width * 0.75, height / 2, height * 0.7 * (report.width / report.height), height * 0.7);
+    if (isPerfectScore) {
+      // Perfect score - center the result section
+      image(resultImages.resultBg, width * 0.5, height / 2, height * 0.7 * (resultImages.resultBg.width / resultImages.resultBg.height), height * 0.7);
+      image(resultImages.result, width * 0.5, height / 2, height * 0.7 * (resultImages.result.width / resultImages.result.height), height * 0.7);
+    } else {
+      // Has missed balloons - show both result and report sections
+      // Result section - centered on width * 0.3
+      image(resultImages.resultBg, width * 0.3, height / 2, height * 0.7 * (resultImages.resultBg.width / resultImages.resultBg.height), height * 0.7);
+      image(resultImages.result, width * 0.3, height / 2, height * 0.7 * (resultImages.result.width / resultImages.result.height), height * 0.7);
+
+      // Report section - centered on width * 0.75
+      image(reportImages.reportBg, width * 0.75, height / 2, height * 0.7 * (reportImages.reportBg.width / reportImages.reportBg.height), height * 0.7);
+      image(reportImages.report, width * 0.75, height / 2, height * 0.7 * (reportImages.report.width / reportImages.report.height), height * 0.7);
+    }
   }
 
   pop();
@@ -296,23 +351,25 @@ function drawEndScreen() {
     drawMissedBalloons();
   }
 
-  // Idle timer display
-  // Set appropriate font for timer text
-  const timerFont = getCurrentFont();
-  if (timerFont) {
-    textFont(timerFont);
+  // Restart instruction display (skip for Tamil)
+  if (currentLang !== 'ta') {
+    // Use text for non-Tamil languages
+    // Set appropriate font for timer text
+    const timerFont = getCurrentFont();
+    if (timerFont) {
+      textFont(timerFont);
+    }
+    
+    fill(COLORS.white);
+    textSize(getFontSize(0.02));
+    text(getText('endRestartPrompt'), width / 2, height * 0.92);
   }
-  
-  fill(COLORS.white);
-  textSize(getFontSize(0.02));
-  text(getText('endRestartPrompt'), width / 2, height * 0.92);
   
   // Timer countdown - handle numbers specially for Chinese and Tamil
   textSize(getFontSize(0.01));
   textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((TIMING.END_SCREEN_DURATION - (TIMING.END_SCREEN_DURATION - endScreenTimer)) / 60);
   
-  const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
   if (currentLang === 'zh') {
     // For Chinese, split the timer message to render number and text separately
     const beforeText = "将于";
@@ -344,9 +401,11 @@ function drawEndScreen() {
     text(afterText, startX + beforeWidth + numberWidth + afterWidth/2, height * 0.965);
     
   } else if (currentLang === 'ta') {
-    // For Tamil, render timer message with current font (numbers will use default via getFontForNumbers already set above)
-    const timerMessage = getText('autoRestartMessage', { timeLeft });
-    text(timerMessage, width / 2, height * 0.965);
+    // For Tamil, only show the countdown number with no text
+    textSize(getFontSize(0.02));
+    textAlign(RIGHT, CENTER);
+    textFont(getFontForNumbers());
+    text(timeLeft.toString(), width * 0.285, height * 0.94);
   } else {
     // For other languages, use regular font
     text(getText('autoRestartMessage', { timeLeft }), width / 2, height * 0.965);
@@ -424,7 +483,8 @@ function drawMissedBalloons() {
   // Calculate balloon size and spacing
   const reportCenterX = width * 0.75;
   const reportCenterY = height / 2;
-  const reportWidth = height * 0.7 * (reportBg.width / reportBg.height) * 0.9;
+  const reportImages = getReportImages();
+  const reportWidth = height * 0.7 * (reportImages.reportBg.width / reportImages.reportBg.height) * 0.9;
   const reportHeight = height * 0.7 * 0.8;
 
   // Calculate rows needed
@@ -497,30 +557,40 @@ function drawMissedBalloons() {
     push();
     imageMode(CENTER);
 
-    // Get balloon image index
+    // Get balloon image index and check for Tamil
     const balloonImageIndex = GAME_CONFIG.balloonColors.indexOf(balloon.color);
-    if (balloonImageIndex >= 0) {
-      image(balloonImages[balloonImageIndex], x, y, balloonSize * 0.8, balloonSize * 0.8);
-    }
-
-    // Draw myth/truth text on balloon
-    // Set appropriate font for balloon text
-    const balloonTextFont = getCurrentFont();
-    if (balloonTextFont) {
-      textFont(balloonTextFont);
-    }
+    const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
     
-    textAlign(CENTER, CENTER);
-    textSize(getFontSizeFromObject(balloonSize, 0.035));
+    if (balloonImageIndex >= 0) {
+      // Use Tamil balloon images if language is Tamil
+      if (currentLang === 'ta' && balloonImagesTa && balloonImagesTa.length > 0 && balloonImagesTa[balloonImageIndex]) {
+        image(balloonImagesTa[balloonImageIndex], x, y, balloonSize * 0.8, balloonSize * 0.8);
+      } else {
+        image(balloonImages[balloonImageIndex], x, y, balloonSize * 0.8, balloonSize * 0.8);
+      }
+    }
 
-    // Text shadow
-    fill(0, 0, 0, 100);
-    textStyle(BOLD);
-    text(balloon.text, x + 1, y - balloonSize * 0.1 + 1);
+    // Only draw text overlay if NOT using Tamil images (since Tamil images have text embedded)
+    if (!(currentLang === 'ta' && balloonImagesTa && balloonImagesTa.length > 0 && balloonImagesTa[balloonImageIndex])) {
+      // Draw myth/truth text on balloon
+      // Set appropriate font for balloon text
+      const balloonTextFont = getCurrentFont();
+      if (balloonTextFont) {
+        textFont(balloonTextFont);
+      }
+      
+      textAlign(CENTER, CENTER);
+      textSize(getFontSizeFromObject(balloonSize, 0.035));
 
-    // Main text
-    fill(COLORS.white);
-    text(balloon.text, x, y - balloonSize * 0.1);
+      // Text shadow
+      fill(0, 0, 0, 100);
+      textStyle(BOLD);
+      text(balloon.text, x + 1, y - balloonSize * 0.1 + 1);
+
+      // Main text
+      fill(COLORS.white);
+      text(balloon.text, x, y - balloonSize * 0.1);
+    }
 
     pop();
 
@@ -533,25 +603,38 @@ function drawMissedBalloons() {
     translate(labelX, labelY);
     rotate(-PI / 6); // Slightly less rotation for better readability
 
-    // Set appropriate font for label text
-    const labelFont = getCurrentFont();
-    if (labelFont) {
-      textFont(labelFont);
-    }
-
-    textAlign(CENTER, CENTER);
-    textSize(getFontSizeFromObject(balloonSize, 0.03));
-    textStyle(BOLD);
-
-    // Label with stroke
-    stroke(COLORS.white);
-    strokeWeight(width * 0.0015);
-    fill('#2e3192');
-
-    if (balloon.truth) {
-      text(getText('truthLabel'), 0, 0);
+    // Check if Tamil and use images instead of text
+    if (currentLang === 'ta') {
+      // Use Tamil label images
+      const labelImage = balloon.truth ? thisTruthTa : thisMythTa;
+      if (labelImage) {
+        imageMode(CENTER);
+        const labelSize = balloonSize * 0.25; // Adjust size as needed
+        const labelHeight = labelSize * (labelImage.height / labelImage.width);
+        image(labelImage, 0, 0, labelSize, labelHeight);
+      }
     } else {
-      text(getText('mythLabel'), 0, 0);
+      // Use text for other languages
+      // Set appropriate font for label text
+      const labelFont = getCurrentFont();
+      if (labelFont) {
+        textFont(labelFont);
+      }
+
+      textAlign(CENTER, CENTER);
+      textSize(getFontSizeFromObject(balloonSize, 0.03));
+      textStyle(BOLD);
+
+      // Label with stroke
+      stroke(COLORS.white);
+      strokeWeight(width * 0.0015);
+      fill('#2e3192');
+
+      if (balloon.truth) {
+        text(getText('truthLabel'), 0, 0);
+      } else {
+        text(getText('mythLabel'), 0, 0);
+      }
     }
 
     pop();
@@ -604,66 +687,105 @@ function drawFeedback() {
   feedbackX = constrain(feedbackX, width * 0.05, width - width * 0.05);
   feedbackY = constrain(feedbackY, height * 0.05, height - height * 0.05);
 
-  // Feedback text with smooth fade using COLORS.accent
-  textAlign(CENTER, CENTER);
-  fill(red(color(COLORS.accent)), green(color(COLORS.accent)), blue(color(COLORS.accent)), fadeAlpha);
-
-  if (feedbackData.isCorrect) {
-    // Correct feedback text
-    const feedbackTextFont = getCurrentFont();
-    if (feedbackTextFont) {
-      textFont(feedbackTextFont);
-    }
-    textSize(getFontSize(0.0208));
-    textStyle(BOLD);
-    text(getText('correctFeedback'), feedbackX, feedbackY - width * 0.011);
-
-    // Points display - use number-safe font for the score part
-    textSize(getFontSize(0.025));
-    const pointsText = `+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`;
+  // Check if Tamil language is selected for image-based feedback
+  const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
+  
+  if (currentLang === 'ta') {
+    // Use Tamil feedback images
+    imageMode(CENTER);
     
-    // For Chinese and Tamil, render the number and text parts separately
-    const currentLang = window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en';
-    if (currentLang === 'zh' || currentLang === 'ta') {
-      // Split into number and text parts
-      const numberPart = `+${SCORE_VALUES.CORRECT}`;
-      const textPart = ` ${getText('pointsSuffix')}`;
-      
-      // Measure text to position properly
-      const numberFont = getFontForNumbers();
-      const languageFont = getCurrentFont();
-      
-      // Draw number part
-      if (numberFont) textFont(numberFont);
-      const numberWidth = textWidth(numberPart);
-      text(numberPart, feedbackX - textWidth(textPart)/2, feedbackY + width * 0.011);
-      
-      // Draw text part
-      if (languageFont) textFont(languageFont);
-      text(textPart, feedbackX + numberWidth/2, feedbackY + width * 0.011);
+    if (feedbackData.isCorrect) {
+      // Show correct Tamil image
+      if (correctTa) {
+        // Apply fade alpha to the image
+        tint(255, fadeAlpha);
+        const imgWidth = width * 0.15; // Adjust size as needed
+        const imgHeight = imgWidth * (correctTa.height / correctTa.width);
+        image(correctTa, feedbackX, feedbackY, imgWidth, imgHeight);
+        noTint();
+      }
     } else {
-      // For other languages, use regular font
-      text(pointsText, feedbackX, feedbackY + width * 0.011);
+      // Show wrong feedback Tamil images
+      let feedbackImage = null;
+      
+      if (feedbackData.isEscapePenalty) {
+        // Balloon escaped - show fly-myth-ta or fly-truth-ta
+        feedbackImage = feedbackData.wasTruth ? flyTruthTa : flyMythTa;
+      } else {
+        // Wrong choice - show wrong-myth-ta or wrong-truth-ta
+        feedbackImage = feedbackData.wasTruth ? wrongTruthTa : wrongMythTa;
+      }
+      
+      if (feedbackImage) {
+        // Apply fade alpha to the image
+        tint(255, fadeAlpha);
+        const imgWidth = width * 0.18; // Slightly larger for wrong feedback
+        const imgHeight = imgWidth * (feedbackImage.height / feedbackImage.width);
+        image(feedbackImage, feedbackX, feedbackY, imgWidth, imgHeight);
+        noTint();
+      }
     }
   } else {
-    // Wrong feedback - use current font for all text
-    const feedbackFont = getCurrentFont();
-    if (feedbackFont) {
-      textFont(feedbackFont);
-    }
-    
-    textSize(getFontSize(0.0208));
-    textStyle(BOLD);
-    text(getText('wrongFeedback'), feedbackX, feedbackY - width * 0.011);
+    // Use text-based feedback for non-Tamil languages
+    textAlign(CENTER, CENTER);
+    fill(red(color(COLORS.accent)), green(color(COLORS.accent)), blue(color(COLORS.accent)), fadeAlpha);
 
-    textSize(getFontSize(0.018));
-    textStyle(NORMAL);
-    let truthType = feedbackData.wasTruth ? getText('truthWord') : getText('mythWord');
+    if (feedbackData.isCorrect) {
+      // Correct feedback text
+      const feedbackTextFont = getCurrentFont();
+      if (feedbackTextFont) {
+        textFont(feedbackTextFont);
+      }
+      textSize(getFontSize(0.0208));
+      textStyle(BOLD);
+      text(getText('correctFeedback'), feedbackX, feedbackY - width * 0.011);
 
-    if (feedbackData.isEscapePenalty) {
-      text(getText('escapeMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
+      // Points display - use number-safe font for the score part
+      textSize(getFontSize(0.025));
+      const pointsText = `+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`;
+      
+      // For Chinese, render the number and text parts separately
+      if (currentLang === 'zh') {
+        // Split into number and text parts
+        const numberPart = `+${SCORE_VALUES.CORRECT}`;
+        const textPart = ` ${getText('pointsSuffix')}`;
+        
+        // Measure text to position properly
+        const numberFont = getFontForNumbers();
+        const languageFont = getCurrentFont();
+        
+        // Draw number part
+        if (numberFont) textFont(numberFont);
+        const numberWidth = textWidth(numberPart);
+        text(numberPart, feedbackX - textWidth(textPart)/2, feedbackY + width * 0.011);
+        
+        // Draw text part
+        if (languageFont) textFont(languageFont);
+        text(textPart, feedbackX + numberWidth/2, feedbackY + width * 0.011);
+      } else {
+        // For other languages, use regular font
+        text(pointsText, feedbackX, feedbackY + width * 0.011);
+      }
     } else {
-      text(getText('wrongChoiceMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
+      // Wrong feedback - use current font for all text
+      const feedbackFont = getCurrentFont();
+      if (feedbackFont) {
+        textFont(feedbackFont);
+      }
+      
+      textSize(getFontSize(0.0208));
+      textStyle(BOLD);
+      text(getText('wrongFeedback'), feedbackX, feedbackY - width * 0.011);
+
+      textSize(getFontSize(0.018));
+      textStyle(NORMAL);
+      let truthType = feedbackData.wasTruth ? getText('truthWord') : getText('mythWord');
+
+      if (feedbackData.isEscapePenalty) {
+        text(getText('escapeMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
+      } else {
+        text(getText('wrongChoiceMessage', { truthType }), feedbackX, feedbackY + width * 0.011);
+      }
     }
   }
 

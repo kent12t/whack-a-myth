@@ -19,9 +19,25 @@ function drawLanguageButton(index, x, y, w, h = null) {
     h = w * (buttonBlue.height / buttonBlue.width);
   }
   
-  // Choose button image based on selection
+  // Choose button image based on selection and language
   const isSelected = index === selectedLanguageIndex;
-  const buttonImage = isSelected ? buttonGreen : buttonBlue;
+  const language = LANGUAGES[index];
+  
+  let buttonImage;
+  if (language && language.code === 'ta') {
+    // Use Tamil-specific buttons if available
+    if (isSelected && buttonTaGreen) {
+      buttonImage = buttonTaGreen;
+    } else if (!isSelected && buttonTaBlue) {
+      buttonImage = buttonTaBlue;
+    } else {
+      // Fallback to regular buttons if Tamil buttons not available
+      buttonImage = isSelected ? buttonGreen : buttonBlue;
+    }
+  } else {
+    // Use regular buttons for other languages
+    buttonImage = isSelected ? buttonGreen : buttonBlue;
+  }
   
   image(buttonImage, x, y, w, h);
   pop();

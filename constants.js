@@ -408,6 +408,106 @@ function getFontSizeForLanguage(languageCode, baseMultiplier) {
   }
 }
 
+// Helper function to get language-specific instruction image
+function getInstructionImage() {
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil
+      return (window.instructionTa && window.instructionTa.width > 0) ? window.instructionTa : window.instruction;
+    case 'zh': // Chinese
+      return (window.instructionZh && window.instructionZh.width > 0) ? window.instructionZh : window.instruction;
+    case 'ms': // Bahasa Melayu
+      return (window.instructionMs && window.instructionMs.width > 0) ? window.instructionMs : window.instruction;
+    case 'en': // English
+    default:
+      return window.instruction;
+  }
+}
+
+// Helper function to get language-specific score background image
+function getScoreBgImage() {
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil
+      return (window.scoreBgTa && window.scoreBgTa.width > 0) ? window.scoreBgTa : window.scoreBg;
+    case 'zh': // Chinese
+      return (window.scoreBgZh && window.scoreBgZh.width > 0) ? window.scoreBgZh : window.scoreBg;
+    case 'ms': // Bahasa Melayu
+      return (window.scoreBgMs && window.scoreBgMs.width > 0) ? window.scoreBgMs : window.scoreBg;
+    case 'en': // English
+    default:
+      return window.scoreBg;
+  }
+}
+
+// Helper function to get language-specific result images
+function getResultImages() {
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil
+      return {
+        result: (window.resultTa && window.resultTa.width > 0) ? window.resultTa : window.result,
+        resultBg: (window.resultBgTa && window.resultBgTa.width > 0) ? window.resultBgTa : window.resultBg
+      };
+    case 'zh': // Chinese
+      return {
+        result: (window.resultZh && window.resultZh.width > 0) ? window.resultZh : window.result,
+        resultBg: window.resultBg  // Always use the same result background
+      };
+    case 'ms': // Bahasa Melayu
+      return {
+        result: (window.resultMs && window.resultMs.width > 0) ? window.resultMs : window.result,
+        resultBg: window.resultBg  // Always use the same result background
+      };
+    case 'en': // English
+    default:
+      return {
+        result: window.result,
+        resultBg: window.resultBg
+      };
+  }
+}
+
+// Helper function to get language-specific report images
+function getReportImages() {
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil
+      return {
+        report: (window.reportTa && window.reportTa.width > 0) ? window.reportTa : window.report,
+        reportBg: window.reportBg  // Always use the same report background
+      };
+    case 'zh': // Chinese
+      return {
+        report: (window.reportZh && window.reportZh.width > 0) ? window.reportZh : window.report,
+        reportBg: window.reportBg  // Always use the same report background
+      };
+    case 'ms': // Bahasa Melayu
+      return {
+        report: (window.reportMs && window.reportMs.width > 0) ? window.reportMs : window.report,
+        reportBg: window.reportBg  // Always use the same report background
+      };
+    case 'en': // English
+    default:
+      return {
+        report: window.report,
+        reportBg: window.reportBg
+      };
+  }
+}
+
 // Make constants globally available for p5.js compatibility and module access
 window.GAME_CONFIG = GAME_CONFIG;
 window.DEPLOYMENT_CONFIG = DEPLOYMENT_CONFIG;
@@ -424,6 +524,10 @@ window.getFontForLanguage = getFontForLanguage;
 window.getFontSize = getFontSize;
 window.getFontSizeFromObject = getFontSizeFromObject;
 window.getFontSizeForLanguage = getFontSizeForLanguage;
+window.getInstructionImage = getInstructionImage;
+window.getScoreBgImage = getScoreBgImage;
+window.getResultImages = getResultImages;
+window.getReportImages = getReportImages;
 window.MYTH_TRUTH_VALUES = MYTH_TRUTH_VALUES;
 window.getLocalizedMythList = getLocalizedMythList;
 window.getMythList = getMythList;
