@@ -96,7 +96,7 @@ function drawButton(x, y, w, h, label, bgColor, textColor) {
   // Button text
   fill(textColor);
   textAlign(CENTER, CENTER);
-  textSize(width * 0.0073);
+  textSize(getFontSize(0.0073));
   textStyle(BOLD);
   text(label, x, y);
   textStyle(NORMAL);

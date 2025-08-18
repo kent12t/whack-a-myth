@@ -74,7 +74,7 @@ class Myth {
     }
 
     fill(0, 0, 0, 100);
-    textSize(this.size * 0.04);
+    textSize(getFontSizeFromObject(this.size, 0.04));
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
     text(this.text, 2, 2); // Offset for shadow effect
@@ -82,7 +82,7 @@ class Myth {
     // Myth text
     blendMode(BLEND);
     fill(COLORS.white);
-    textSize(this.size * 0.04);
+    textSize(getFontSizeFromObject(this.size, 0.04));
     text(this.text, 0, 0); // Centered at origin after translate
     textStyle(NORMAL);
 

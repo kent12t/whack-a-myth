@@ -5,7 +5,7 @@ const assets = {
   backgroundImage: null,
   gameFont: null,
   notoSansFont: null,
-  pingFangFont: null,
+  notoSansSCFont: null,
   startBtn: null,
   logo: null,
   scoreBg: null,
@@ -51,9 +51,9 @@ Object.defineProperty(window, 'notoSansFont', {
   set: (value) => assets.notoSansFont = value
 });
 
-Object.defineProperty(window, 'pingFangFont', {
-  get: () => assets.pingFangFont,
-  set: (value) => assets.pingFangFont = value
+Object.defineProperty(window, 'notoSansSCFont', {
+  get: () => assets.notoSansSCFont,
+  set: (value) => assets.notoSansSCFont = value
 });
 
 Object.defineProperty(window, 'startBtn', {
@@ -168,17 +168,17 @@ function preload() {
     }
   );
   
-  assets.pingFangFont = loadFont('assets/PingFang-Semibold.ttf',
+  assets.notoSansSCFont = loadFont('assets/NotoSansSC-Bold.otf',
     () => {
-      console.log('✅ Chinese font loaded successfully');
-      console.log('🔍 PingFang font object:', assets.pingFangFont);
+      console.log('✅ Chinese font (NotoSansSC) loaded successfully');
+      console.log('🔍 NotoSansSC font object:', assets.notoSansSCFont);
       // Test if the font can render numbers
-      if (assets.pingFangFont && assets.pingFangFont.font) {
-        console.log('🔤 PingFang font has glyph support');
+      if (assets.notoSansSCFont && assets.notoSansSCFont.font) {
+        console.log('🔤 NotoSansSC font has glyph support');
       }
     },
     (err) => {
-      console.error('❌ Failed to load Chinese font:', err);
+      console.error('❌ Failed to load Chinese font (NotoSansSC):', err);
       console.log('📝 Chinese text will fallback to default font');
     }
   );

@@ -18,7 +18,7 @@ function drawStartScreen() {
 
     // Subtitle
     textAlign(CENTER, CENTER);
-    textSize(width * 0.016);
+    textSize(getFontSize(0.016));
     textStyle(NORMAL);
     fill(COLORS.white);
     
@@ -35,13 +35,13 @@ function drawStartScreen() {
 
     // Instructions
     textAlign(CENTER, CENTER);
-    textSize(width * 0.016);
+    textSize(getFontSize(0.016));
     textStyle(BOLD);
     fill(COLORS.white);
     
     // Top line: Always English (use default font)
     textFont(gameFont);
-    text(UI_TEXT.en.startInstruction, width / 2, height * 0.9);
+    text(UI_TEXT.en.startInstruction, width / 2, height * 0.89);
     
     // Bottom line: Only show if language is not English
     const currentLang = getSelectedLanguage ? getSelectedLanguage().code : 'en';
@@ -51,7 +51,8 @@ function drawStartScreen() {
       if (instructionFont) {
         textFont(instructionFont);
       }
-      text(getText('startInstruction'), width / 2, height * 0.94);
+      textAlign(CENTER, TOP);
+      text(getText('startInstruction'), width / 2, height * 0.92);
     }
   } else {
 
@@ -71,7 +72,7 @@ function drawStartScreen() {
 
     // Simple English-only instructions
     textAlign(CENTER, CENTER);
-    textSize(width * 0.02);
+    textSize(getFontSize(0.02));
     textStyle(BOLD);
     fill(COLORS.white);
     text("HAMMER ANY BUTTON TO START!", width / 2, height * 0.86);
@@ -96,7 +97,9 @@ function drawLanguageSelection() {
 
     // Draw language label
     textAlign(CENTER, CENTER);
-    textSize(width * 0.014);
+    
+    // Use font size specific to this language, not the currently selected language
+    textSize(getFontSizeForLanguage(LANGUAGES[i].code, 0.014));
     textStyle(BOLD);
 
     // Highlight selected language text
@@ -157,7 +160,7 @@ function drawInstructionScreen() {
   drawBalloon(violetBalloon.x, violetBalloon.y, violetBalloon.size, violetBalloon.color, violetBalloon.rotation);
 
   // Continue prompt
-  textSize(width * 0.02);
+  textSize(getFontSize(0.02));
   textStyle(BOLD);
   fill(COLORS.white);
   textAlign(CENTER, CENTER);
@@ -238,7 +241,7 @@ function drawGameScreen() {
     textFont(scoreFont);
   }
   
-  textSize(width * 0.0292);
+  textSize(getFontSize(0.0292));
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   fill(COLORS.white);
@@ -282,7 +285,7 @@ function drawEndScreen() {
   }
   
   fill(COLORS.white);
-  textSize(width * 0.0375);
+  textSize(getFontSize(0.0375));
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   let scoreX = isPerfectScore ? width * 0.505 : width * 0.305;
@@ -301,11 +304,11 @@ function drawEndScreen() {
   }
   
   fill(COLORS.white);
-  textSize(width * 0.02);
+  textSize(getFontSize(0.02));
   text(getText('endRestartPrompt'), width / 2, height * 0.92);
   
   // Timer countdown - handle numbers specially for Chinese and Tamil
-  textSize(width * 0.01);
+  textSize(getFontSize(0.01));
   textAlign(CENTER, CENTER);
   let timeLeft = Math.ceil((TIMING.END_SCREEN_DURATION - (TIMING.END_SCREEN_DURATION - endScreenTimer)) / 60);
   
@@ -508,7 +511,7 @@ function drawMissedBalloons() {
     }
     
     textAlign(CENTER, CENTER);
-    textSize(balloonSize * 0.035);
+    textSize(getFontSizeFromObject(balloonSize, 0.035));
 
     // Text shadow
     fill(0, 0, 0, 100);
@@ -537,7 +540,7 @@ function drawMissedBalloons() {
     }
 
     textAlign(CENTER, CENTER);
-    textSize(balloonSize * 0.03);
+    textSize(getFontSizeFromObject(balloonSize, 0.03));
     textStyle(BOLD);
 
     // Label with stroke
@@ -611,12 +614,12 @@ function drawFeedback() {
     if (feedbackTextFont) {
       textFont(feedbackTextFont);
     }
-    textSize(width * 0.0208);
+    textSize(getFontSize(0.0208));
     textStyle(BOLD);
     text(getText('correctFeedback'), feedbackX, feedbackY - width * 0.011);
 
     // Points display - use number-safe font for the score part
-    textSize(width * 0.025);
+    textSize(getFontSize(0.025));
     const pointsText = `+${SCORE_VALUES.CORRECT} ${getText('pointsSuffix')}`;
     
     // For Chinese and Tamil, render the number and text parts separately
@@ -649,11 +652,11 @@ function drawFeedback() {
       textFont(feedbackFont);
     }
     
-    textSize(width * 0.0208);
+    textSize(getFontSize(0.0208));
     textStyle(BOLD);
     text(getText('wrongFeedback'), feedbackX, feedbackY - width * 0.011);
 
-    textSize(width * 0.018);
+    textSize(getFontSize(0.018));
     textStyle(NORMAL);
     let truthType = feedbackData.wasTruth ? getText('truthWord') : getText('mythWord');
 

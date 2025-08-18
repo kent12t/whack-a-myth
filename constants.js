@@ -48,7 +48,7 @@ const UI_TEXT = {
   en: {
     // Start screen
     startSubtitle: "Ready to bust some myths?",
-    startInstruction: "HAMMER RED TO SELECT LANGUAGE AND HAMMER GREEN TO START!",
+    startInstruction: "HAMMER RED BUTTON TO SELECT LANGUAGE AND HAMMER GREEN BUTTON TO START!",
     
     // Instruction screen
     instructionPrompt: "HAMMER ANY BUTTON TO START!",
@@ -155,7 +155,7 @@ const UI_TEXT = {
     // Start screen
     startSubtitle: "சில கட்டுக்கதைகளை உடைத்து உண்மையை வெளிக்கொணர நீங்கள் தயாரா?",
     // startInstruction: "மொழியைத் தேர்வு செய்ய 'MYTH' மீது சுத்தியலைப் பிடித்துத் தட்டவும். ஆரம்பிக்க 'TRUTH' மீது சுத்தியலால் தட்டவும்.",
-    startInstruction: "மொழியைத் தேர்வு செய்ய சிவப்பு பொத்தான் மீது சுத்தியலைப் பிடித்துத் தட்டவும். ஆரம்பிக்க பச்சை பொத்தான் மீது சுத்தியலால் தட்டவும்.",
+    startInstruction: "மொழியைத் தேர்வு செய்ய சிவப்பு பொத்தான் மீது சுத்தியலைப் பிடித்துத் தட்டவும்.\nஆரம்பிக்க பச்சை பொத்தான் மீது சுத்தியலால் தட்டவும்.",
     
     // Instruction screen
     instructionPrompt: "தொடங்குவதற்கு ஏதேனும் ஒரு பொத்தானை சுத்தியால் தட்டவும்!",
@@ -273,14 +273,14 @@ function debugFontStatus() {
   console.log('🔍 Font Debug Status:');
   console.log('  gameFont loaded:', isFontLoaded(window.gameFont));
   console.log('  notoSansFont loaded:', isFontLoaded(window.notoSansFont));
-  console.log('  pingFangFont loaded:', isFontLoaded(window.pingFangFont));
+  console.log('  notoSansSCFont loaded:', isFontLoaded(window.notoSansSCFont));
   
   if (window.getSelectedLanguage) {
     const currentLang = window.getSelectedLanguage().code;
     console.log('  Current language:', currentLang);
     console.log('  Current font should be:', getCurrentFont() === window.gameFont ? 'gameFont' : 
                 getCurrentFont() === window.notoSansFont ? 'notoSansFont' : 
-                getCurrentFont() === window.pingFangFont ? 'pingFangFont' : 'unknown');
+                getCurrentFont() === window.notoSansSCFont ? 'notoSansSCFont' : 'unknown');
   }
 }
 
@@ -300,10 +300,10 @@ function getCurrentFont() {
         return window.gameFont;
       }
     case 'zh': // Chinese
-      if (isFontLoaded(window.pingFangFont)) {
-        return window.pingFangFont;
+      if (isFontLoaded(window.notoSansSCFont)) {
+        return window.notoSansSCFont;
       } else {
-        console.warn('⚠️ Chinese font not loaded, using fallback');
+        console.warn('⚠️ Chinese font (NotoSansSC) not loaded, using fallback');
         return window.gameFont;
       }
     case 'en': // English
@@ -343,16 +343,68 @@ function getFontForLanguage(languageCode) {
         return window.gameFont;
       }
     case 'zh': // Chinese
-      if (isFontLoaded(window.pingFangFont)) {
-        return window.pingFangFont;
+      if (isFontLoaded(window.notoSansSCFont)) {
+        return window.notoSansSCFont;
       } else {
-        console.warn('⚠️ Chinese font not available for language selection');
+        console.warn('⚠️ Chinese font (NotoSansSC) not available for language selection');
         return window.gameFont;
       }
     case 'en': // English
     case 'ms': // Bahasa Melayu
     default:
       return window.gameFont;
+  }
+}
+
+// Helper function to get language-specific font size based on width multiplier
+function getFontSize(baseMultiplier) {
+  // In deployment mode, always use English (default sizing)
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil - slightly smaller font
+      return width * baseMultiplier * 0.9;
+    case 'zh': // Chinese - larger font
+      return width * baseMultiplier * 1.15;
+    case 'en': // English
+    case 'ms': // Bahasa Melayu
+    default:
+      return width * baseMultiplier; // Default size
+  }
+}
+
+// Helper function to get language-specific font size based on object size multiplier (for balloons, etc.)
+function getFontSizeFromObject(objectSize, baseMultiplier) {
+  // In deployment mode, always use English (default sizing)
+  const lang = DEPLOYMENT_CONFIG.enableLanguageSelection 
+    ? (window.getSelectedLanguage ? window.getSelectedLanguage().code : 'en')
+    : 'en';
+  
+  switch (lang) {
+    case 'ta': // Tamil - slightly smaller font
+      return objectSize * baseMultiplier * 0.9;
+    case 'zh': // Chinese - larger font
+      return objectSize * baseMultiplier * 1.15;
+    case 'en': // English
+    case 'ms': // Bahasa Melayu
+    default:
+      return objectSize * baseMultiplier; // Default size
+  }
+}
+
+// Helper function to get font size for a specific language (for language selector buttons)
+function getFontSizeForLanguage(languageCode, baseMultiplier) {
+  switch (languageCode) {
+    case 'ta': // Tamil - slightly smaller font
+      return width * baseMultiplier * 0.9;
+    case 'zh': // Chinese - larger font
+      return width * baseMultiplier * 1.15;
+    case 'en': // English
+    case 'ms': // Bahasa Melayu
+    default:
+      return width * baseMultiplier; // Default size
   }
 }
 
@@ -369,6 +421,9 @@ window.debugFontStatus = debugFontStatus;
 window.getCurrentFont = getCurrentFont;
 window.getFontForNumbers = getFontForNumbers;
 window.getFontForLanguage = getFontForLanguage;
+window.getFontSize = getFontSize;
+window.getFontSizeFromObject = getFontSizeFromObject;
+window.getFontSizeForLanguage = getFontSizeForLanguage;
 window.MYTH_TRUTH_VALUES = MYTH_TRUTH_VALUES;
 window.getLocalizedMythList = getLocalizedMythList;
 window.getMythList = getMythList;

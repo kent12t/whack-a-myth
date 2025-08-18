@@ -30,9 +30,9 @@ canvas {
 }
 
 @font-face {
-  font-family: 'PingFang-Semibold';
-  src: url('assets/PingFang-Semibold.ttf') format('truetype');
-  font-weight: 600;
+  font-family: 'NotoSansSC-Bold';
+  src: url('assets/NotoSansSC-Bold.otf') format('opentype');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
