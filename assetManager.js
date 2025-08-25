@@ -512,7 +512,7 @@ function preload() {
 // Music control functions
 function startBackgroundMusic() {
   if (assets.backgroundMusic && !assets.backgroundMusic.isPlaying()) {
-    assets.backgroundMusic.setVolume(0.06); // Set volume to 10%
+    assets.backgroundMusic.setVolume(0.6); // Set volume to 10%
     assets.backgroundMusic.loop(); // Loop the music continuously
   }
 }
@@ -539,13 +539,13 @@ function resumeBackgroundMusic() {
 function playPopSound() {
   // Play pop sound immediately for correct balloon hits
   if (assets.popSound) {
-    assets.popSound.setVolume(1.0); // Set volume to 100%
+    assets.popSound.setVolume(2.0); // Set volume to 100%
     assets.popSound.play();
   }
   // Delay correct sound by 10 frames (approximately 167ms at 60fps)
   if (assets.correctSound) {
     setTimeout(() => {
-      assets.correctSound.setVolume(0.25);
+      assets.correctSound.setVolume(1);
       assets.correctSound.play();
     }, 167); // 10 frames at 60fps = 167ms
   }
@@ -553,7 +553,7 @@ function playPopSound() {
 
 function playWrongSound() {
   if (assets.wrongSound) {
-    assets.wrongSound.setVolume(0.6); // Set volume to 100%
+    assets.wrongSound.setVolume(1); // Set volume to 100%
     assets.wrongSound.play();
   }
 }
@@ -567,7 +567,7 @@ function playWrongWithPop() {
   // Delay wrong sound by 10 frames (approximately 167ms at 60fps)
   if (assets.wrongSound) {
     setTimeout(() => {
-      assets.wrongSound.setVolume(0.6);
+      assets.wrongSound.setVolume(1);
       assets.wrongSound.play();
     }, 120); // 10 frames at 60fps = 167ms
   }
@@ -576,7 +576,7 @@ function playWrongWithPop() {
 function playUIProgressSound() {
   // Play pop sound for UI progression (button presses that advance screens)
   if (assets.popSound) {
-    assets.popSound.setVolume(0.2); // Slightly quieter than gameplay for UI feedback
+    assets.popSound.setVolume(0.6); // Slightly quieter than gameplay for UI feedback
     assets.popSound.play();
   }
 }
