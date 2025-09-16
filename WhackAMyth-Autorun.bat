@@ -8,11 +8,16 @@ start /b npm run preview:csv
 
 REM Wait for 10 seconds
 echo Waiting...
-timeout /t 3 /nobreak
+timeout /t 2 /nobreak
 
 REM Open another batch file - replace with the actual path
 echo Opening second batch file...
-start "" "C:\Users\Kent\Desktop\Onedrive\OneDrive - OFF THE BEATEN TRACK PTE. LTD\Documents\Github\whack-a-myth\EdgeKioskLauncher.bat"
+start "" ".\EdgeKioskLauncher.bat"
+
+REM Wait a bit and click the device connect button
+echo Clicking device connect button...
+timeout /t 3 /nobreak
+powershell -ExecutionPolicy Bypass -File "ClickDeviceConnect.ps1"
 
 REM Close this batch file
 echo Closing this batch file...
