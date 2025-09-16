@@ -109,7 +109,8 @@ class CSVDatabase {
       this.currentSession = {
         id: sessionId,
         startTime: startTime,
-        source: 'csv'
+        source: 'csv',
+        questionResults: [] // Initialize an empty array for question results
       };
       
       console.log('CSV game session started:', this.currentSession);
@@ -117,6 +118,23 @@ class CSVDatabase {
     } catch (error) {
       console.error('Error starting CSV game session:', error);
       return null;
+    }
+  }
+
+  /**
+   * Add a question result to the current session
+   */
+  addQuestionResult(questionIndex, mythText, isTruth, outcome) {
+    if (this.currentSession) {
+      this.currentSession.questionResults.push({
+        questionIndex: questionIndex,
+        mythText: mythText,
+        isTruth: isTruth,
+        outcome: outcome // 'correct', 'wrong', 'skipped'
+      });
+      this.saveToLocalStorage(); // Save after each result
+    } else {
+      console.warn('No active session to add question result to.');
     }
   }
 
@@ -136,7 +154,8 @@ class CSVDatabase {
         start_time: this.currentSession.startTime,
         end_time: endTime,
         result: finalScore.toString(),
-        session_date: new Date().toLocaleDateString()
+        session_date: new Date().toLocaleDateString(),
+        question_results: JSON.stringify(this.currentSession.questionResults.map(q => q.outcome))
       };
       
       const success = await this.addSessionToCSV(sessionData);

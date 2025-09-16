@@ -1,3 +1,5 @@
+import { addQuestionResultToSession } from './database.js';
+
 // Screen drawing functions
 
 function drawStartScreen() {
@@ -221,6 +223,14 @@ function drawGameScreen() {
 
         // Play wrong sound for balloon that flew away
         playWrongSound();
+
+        // Record the result as skipped
+        addQuestionResultToSession(
+          currentQuestionNumber, // Assuming currentQuestionNumber is available globally
+          currentMyth.text,
+          currentMyth.truth,
+          'skipped'
+        );
       }
 
       // Always create next myth (or trigger end if no more myths)

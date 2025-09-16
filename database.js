@@ -253,6 +253,20 @@ export function getCurrentSession() {
 }
 
 /**
+ * Add a question result to the current session
+ * @param {number} questionIndex - The index of the question
+ * @param {string} mythText - The text of the myth/truth
+ * @param {boolean} isTruth - Whether the question was a truth or a myth
+ * @param {string} outcome - The outcome of the question ('correct', 'wrong', 'skipped')
+ */
+export function addQuestionResultToSession(questionIndex, mythText, isTruth, outcome) {
+  if (csvDatabase) {
+    csvDatabase.addQuestionResult(questionIndex, mythText, isTruth, outcome);
+  }
+  // TODO: Implement for Supabase/localStorage if needed
+}
+
+/**
  * Check if database is available
  * @returns {boolean} Database availability status
  */

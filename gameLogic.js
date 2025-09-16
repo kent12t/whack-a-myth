@@ -1,4 +1,4 @@
-// Game logic and state management
+import { addQuestionResultToSession } from './database.js';
 
 // Game state object to maintain state across modules
 const gameState = {
@@ -34,6 +34,11 @@ Object.defineProperty(window, 'currentHeight', {
 
 Object.defineProperty(window, 'currentMythIndex', {
   get: () => gameState.currentMythIndex,
+  set: (value) => gameState.currentMythIndex = value
+});
+
+Object.defineProperty(window, 'currentQuestionNumber', {
+  get: () => gameState.currentMythIndex, // currentMythIndex represents the number of questions processed
   set: (value) => gameState.currentMythIndex = value
 });
 
@@ -171,6 +176,14 @@ function handleBalloonHit(isSpacePressed) {
     };
     correctAction = true;
     
+    // Record the result
+    addQuestionResultToSession(
+      currentQuestionNumber,
+      gameState.currentMyth.text,
+      gameState.currentMyth.truth,
+      'correct'
+    );
+    
     // Play pop sound for correct hit
     playPopSound();
   } else {
@@ -192,6 +205,14 @@ function handleBalloonHit(isSpacePressed) {
       color: gameState.currentMyth.color,
       missType: 'WRONG_BUTTON'
     });
+    
+    // Record the result
+    addQuestionResultToSession(
+      currentQuestionNumber,
+      gameState.currentMyth.text,
+      gameState.currentMyth.truth,
+      'wrong'
+    );
     
     // Play both pop (softer) and wrong sound for wrong button press
     playWrongWithPop();
